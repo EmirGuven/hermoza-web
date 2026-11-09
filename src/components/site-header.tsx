@@ -5,6 +5,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { HermozaLogo } from "@/components/hermoza-logo";
+import { contact } from "@/lib/contact";
 
 const links = [
   { href: "#koleksiyonlar", label: "Koleksiyonlar" },
@@ -119,8 +120,8 @@ export function SiteHeader() {
                 </ul>
               </nav>
               <div className="flex flex-wrap gap-x-10 gap-y-2 text-xs font-light tracking-wide text-white/50">
-                <span>info@hermoza.com</span>
-                <span>+90 000 000 00 00</span>
+                <a href={contact.emailHref} className="hover:text-white">{contact.email}</a>
+                <a href={contact.phoneHref} className="hover:text-white">{contact.phone}</a>
               </div>
             </div>
             <div className="relative hidden md:block">

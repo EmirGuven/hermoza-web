@@ -2,6 +2,7 @@ import Image from "next/image";
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { BackgroundVideo } from "@/components/background-video";
 import { Hero } from "@/components/hero";
+import { contact } from "@/lib/contact";
 import { HermozaLogo } from "@/components/hermoza-logo";
 import { Reveal } from "@/components/reveal";
 import { SiteHeader } from "@/components/site-header";
@@ -177,17 +178,23 @@ export default function Home() {
                 için randevu oluşturun. 48 saat içinde dönüş yapıyoruz.
               </p>
               <ul className="space-y-5 text-sm font-light text-white/80">
-                <li className="flex items-center gap-4">
-                  <MapPin className="size-4 text-clay" strokeWidth={1.5} />
-                  Showroom adresi
+                <li>
+                  <a href={contact.mapsHref} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 transition-colors hover:text-clay">
+                    <MapPin className="mt-0.5 size-4 shrink-0 text-clay" strokeWidth={1.5} />
+                    {contact.address}
+                  </a>
                 </li>
-                <li className="flex items-center gap-4">
-                  <Phone className="size-4 text-clay" strokeWidth={1.5} />
-                  +90 000 000 00 00
+                <li>
+                  <a href={contact.phoneHref} className="flex items-center gap-4 transition-colors hover:text-clay">
+                    <Phone className="size-4 shrink-0 text-clay" strokeWidth={1.5} />
+                    {contact.phone}
+                  </a>
                 </li>
-                <li className="flex items-center gap-4">
-                  <Mail className="size-4 text-clay" strokeWidth={1.5} />
-                  info@hermoza.com
+                <li>
+                  <a href={contact.emailHref} className="flex items-center gap-4 transition-colors hover:text-clay">
+                    <Mail className="size-4 shrink-0 text-clay" strokeWidth={1.5} />
+                    {contact.email}
+                  </a>
                 </li>
               </ul>
             </div>
@@ -255,7 +262,11 @@ export default function Home() {
         </div>
         <div className="mx-auto mt-16 flex max-w-7xl flex-col justify-between gap-2 border-t border-white/10 pt-6 text-xs font-light text-white/40 md:flex-row">
           <span>© 2026 Hermoza Wood Industry</span>
-          <span>Tüm hakları saklıdır.</span>
+          <span className="flex flex-wrap gap-x-6 gap-y-1">
+            <a href={contact.phoneHref} className="hover:text-white">{contact.phone}</a>
+            <a href={contact.emailHref} className="hover:text-white">{contact.email}</a>
+            <a href={contact.facebookHref} target="_blank" rel="noopener noreferrer" className="hover:text-white">Facebook</a>
+          </span>
         </div>
       </footer>
     </>
