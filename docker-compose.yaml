@@ -5,6 +5,9 @@ services:
       dockerfile: Dockerfile
       # Build sırasında sunucudaki Postgres'e (127.0.0.1:5432) ulaşıp sayfaları gerçek içerikle derlemek için
       network: host
+      args:
+        # Sitemap / robots / paylaşım kartları build sırasında bu adresle üretilir
+        SITE_URL: ${SITE_URL:-https://hermoza.com.tr}
       secrets:
         - database_url
     container_name: hermoza-web
@@ -49,8 +52,10 @@ services:
       # Gizli bilgiler burada değil, proje kökündeki .env dosyasında tutulur (.env.example'a bakın)
       DATABASE_URL: ${DATABASE_URL}
       SESSION_SECRET: ${SESSION_SECRET}
-      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
-      SMTP_PORT: ${SMTP_PORT:-465}
+      # Google SMTP Relay: sunucu IP'si (46.225.13.26) Google yönetici panelinde izinli, şifre gerekmez
+      SMTP_HOST: ${SMTP_HOST:-smtp-relay.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_HELO: ${SMTP_HELO:-hermoza.com.tr}
       SMTP_USER: ${SMTP_USER}
       SMTP_PASS: ${SMTP_PASS}
       MAIL_FROM: ${MAIL_FROM}

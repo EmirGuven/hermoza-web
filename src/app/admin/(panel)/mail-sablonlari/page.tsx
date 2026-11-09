@@ -22,7 +22,7 @@ export default async function MailTemplatesPage() {
     db.select().from(mailTemplates),
     db.select().from(mailLog).orderBy(desc(mailLog.createdAt)).limit(30),
   ]);
-  const smtpReady = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  const smtpReady = Boolean(process.env.SMTP_HOST);
 
   return (
     <div className="stack">

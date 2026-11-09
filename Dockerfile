@@ -8,7 +8,10 @@ RUN npm ci
 
 FROM node:22-alpine AS build
 WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1
+# Sitemap, robots.txt, llms.txt ve paylaşım kartları build sırasında üretilir: site adresi burada da gerekli
+ARG SITE_URL=https://hermoza.com.tr
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    SITE_URL=${SITE_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Build sırasında sayfalar gerçek içerikle ön-render edilsin diye veritabanı adresi

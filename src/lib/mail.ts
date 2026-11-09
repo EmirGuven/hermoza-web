@@ -9,14 +9,24 @@ import { SITE_URL } from "@/lib/site";
 
 const globalForMail = globalThis as unknown as { mailer?: Transporter };
 
+/**
+ * SMTP bağlantısı.
+ * - Google SMTP Relay (smtp-relay.gmail.com): sunucunun IP'si Google yönetici panelinde izinli; şifre gerekmez,
+ *   SMTP_PASS boş bırakılır.
+ * - Normal SMTP: SMTP_USER + SMTP_PASS ile kimlik doğrulama.
+ */
 function transporter(): Transporter | null {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_HELO } = process.env;
+  if (!SMTP_HOST) return null;
+  const port = Number(SMTP_PORT || 587);
   globalForMail.mailer ??= nodemailer.createTransport({
     host: SMTP_HOST,
-    port: Number(SMTP_PORT || 465),
-    secure: Number(SMTP_PORT || 465) === 465,
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
+    port,
+    secure: port === 465,
+    requireTLS: port === 587,
+    // Relay, konteynerin rastgele adıyla gelen EHLO'yu reddedebilir; alan adıyla tanıt
+    name: SMTP_HELO || "hermoza.com.tr",
+    ...(SMTP_USER && SMTP_PASS ? { auth: { user: SMTP_USER, pass: SMTP_PASS.replace(/\s/g, "") } } : {}),
   });
   return globalForMail.mailer;
 }
