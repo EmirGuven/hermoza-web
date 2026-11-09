@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+# Aynı anda tek deploy: üst üste push gelirse sıradaki bekler, iki build aynı konteyner adına çakışmaz
+concurrency:
+  group: deploy-hermoza-web
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

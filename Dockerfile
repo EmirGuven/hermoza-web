@@ -18,6 +18,15 @@ RUN --mount=type=secret,id=database_url,required=false \
     if [ -f /run/secrets/database_url ]; then export DATABASE_URL="$(cat /run/secrets/database_url)"; fi; \
     npm run build
 
+# Migration script'i için ayrı, küçük bağımlılık klasörü. Standalone çıktı drizzle-orm'u uygulama
+# koduna gömdüğü için node_modules'ta bırakmaz; migrate.mjs'in kendi paketleri olmalı.
+# Sürümler package.json'dan okunur.
+FROM node:22-alpine AS migrator
+WORKDIR /migrate
+COPY package.json ./app-package.json
+RUN node -e "const d=require('./app-package.json').dependencies; require('fs').writeFileSync('package.json', JSON.stringify({private:true, type:'module', dependencies:{'drizzle-orm':d['drizzle-orm'], pg:d.pg}}))" \
+    && npm install --omit=dev --no-audit --no-fund
+
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
@@ -31,10 +40,13 @@ COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/drizzle ./drizzle
-COPY --from=build --chown=node:node /app/scripts/migrate.mjs ./scripts/migrate.mjs
+COPY --from=migrator --chown=node:node /migrate/node_modules ./migrate/node_modules
+COPY --from=migrator --chown=node:node /migrate/package.json ./migrate/package.json
+COPY --from=build --chown=node:node /app/scripts/migrate.mjs ./migrate/migrate.mjs
 RUN mkdir -p /app/uploads && chown node:node /app/uploads
 
 # node kullanıcısı (uid 1000) sunucudaki dev kullanıcısıyla aynı: uploads klasörüne yazabilir
 USER node
 EXPOSE 3000
-CMD ["sh", "-c", "node scripts/migrate.mjs && exec node server.js"]
+# Önce bekleyen migration'lar (çalışma klasörü /app, drizzle/ buradan okunur), sonra uygulama
+CMD ["sh", "-c", "node migrate/migrate.mjs && exec node server.js"]
