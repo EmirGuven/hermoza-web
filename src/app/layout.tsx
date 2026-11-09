@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hermoza Wood Industry — Ölçüye özel ahşap mobilya",
+  title: "Hermoza Kitchen & Atelier — Ölçüye özel mutfak ve mobilya",
   description:
     "Mutfak, yaşam alanı ve giyinme odası için atölyede üretilen ölçüye özel masif ahşap mobilyalar.",
 };

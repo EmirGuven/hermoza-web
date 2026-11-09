@@ -4,6 +4,7 @@ import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { BackgroundVideo } from "@/components/background-video";
 import { ContactForm } from "@/components/contact-form";
 import { Hero } from "@/components/hero";
+import { NewsletterForm } from "@/components/newsletter-form";
 import { HermozaLogo } from "@/components/hermoza-logo";
 import { Reveal } from "@/components/reveal";
 import { SiteHeader } from "@/components/site-header";
@@ -229,18 +230,7 @@ export default async function Home() {
             {general.newsletterEnabled && (
               <>
                 <p className="mb-4 mt-10 text-[10px] uppercase tracking-[0.35em] text-clay">Bülten</p>
-                <form className="flex border-b border-white/25 focus-within:border-clay">
-                  <input
-                    type="email"
-                    name="newsletter"
-                    placeholder="E-posta adresiniz"
-                    aria-label="E-posta adresiniz"
-                    className="w-full bg-transparent py-3 text-sm font-light outline-none placeholder:text-white/35"
-                  />
-                  <button type="submit" aria-label="Bültene kaydol" className="px-2 text-white/60 hover:text-clay">
-                    <ArrowRight className="size-4" />
-                  </button>
-                </form>
+                <NewsletterForm />
               </>
             )}
           </div>

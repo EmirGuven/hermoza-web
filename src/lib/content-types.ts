@@ -68,8 +68,8 @@ export type JournalPost = {
 const m = (p: string) => `/media/${p}`;
 
 export const defaultGeneral: GeneralSettings = {
-  siteName: "Hermoza Wood Industry",
-  seoTitle: "Hermoza Wood Industry — Ölçüye özel ahşap mobilya",
+  siteName: "Hermoza Kitchen & Atelier",
+  seoTitle: "Hermoza Kitchen & Atelier — Ölçüye özel mutfak ve mobilya",
   seoDescription:
     "Mutfak, yaşam alanı ve giyinme odası için atölyede üretilen ölçüye özel masif ahşap mobilyalar.",
   logo: m("brand/hermoza-icon-white.png"),
@@ -85,7 +85,7 @@ export const defaultGeneral: GeneralSettings = {
     { label: "Koleksiyonlar", href: "#koleksiyonlar" },
     { label: "İletişim", href: "#iletisim" },
   ],
-  footerCopyright: "© 2026 Hermoza Wood Industry",
+  footerCopyright: "© 2026 Hermoza Kitchen & Atelier",
   newsletterEnabled: true,
 };
 

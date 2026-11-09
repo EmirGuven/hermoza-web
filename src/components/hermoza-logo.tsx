@@ -34,7 +34,7 @@ export function HermozaLogo({
         <span className="text-[15px] font-normal tracking-[0.18em]">HERMOZA</span>
         {withTagline && (
           <span className="mt-1 text-[7.5px] font-normal tracking-[0.55em] opacity-70">
-            WOOD INDUSTRY
+            KITCHEN &amp; ATELIER
           </span>
         )}
       </span>

@@ -12,6 +12,9 @@ import { SITE_TAG, readSetting } from "@/lib/content";
 import type { NavLink, SettingKey } from "@/lib/content-types";
 import { resolveUpload } from "@/lib/media";
 
+/** Bülten kayıtları mesajlar listesinde bu adla görünür */
+const NEWSLETTER_NAME = "Bülten aboneliği";
+
 export type ActionState = {
   ok?: boolean;
   error?: string;
@@ -278,6 +281,23 @@ export async function setMessageRead(id: number, read: boolean) {
 export async function deleteMessage(id: number) {
   await requireAdmin();
   await db.delete(messages).where(eq(messages.id, id));
+}
+
+/* ---------------- Footer bülten kaydı (herkese açık) ---------------- */
+
+export async function subscribeNewsletter(_: ActionState, f: FormData): Promise<ActionState> {
+  const email = str(f, "newsletter").toLowerCase().slice(0, 160);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("Geçerli bir e-posta yazın");
+  // Aynı adres daha önce kaydolduysa tekrar ekleme
+  const exists = await db
+    .select({ id: messages.id })
+    .from(messages)
+    .where(and(eq(messages.email, email), eq(messages.name, NEWSLETTER_NAME)))
+    .limit(1);
+  if (!exists.length) {
+    await db.insert(messages).values({ name: NEWSLETTER_NAME, email, body: "Bülten aboneliği" });
+  }
+  return done("Teşekkürler, bültene kaydoldunuz.");
 }
 
 /* ---------------- Sitedeki iletişim formu (herkese açık) ---------------- */
