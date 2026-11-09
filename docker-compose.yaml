@@ -18,10 +18,13 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
 
-      # hermoza.com.tr (http + https)
+      # hermoza.com.tr: http -> https yönlendirmesi
       - "traefik.http.routers.hermoza-web.rule=Host(`hermoza.com.tr`)"
       - "traefik.http.routers.hermoza-web.entrypoints=web"
+      - "traefik.http.routers.hermoza-web.middlewares=hermoza-https"
       - "traefik.http.routers.hermoza-web.service=hermoza-web"
+      - "traefik.http.middlewares.hermoza-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.hermoza-https.redirectscheme.permanent=true"
 
       - "traefik.http.routers.hermoza-web-secure.rule=Host(`hermoza.com.tr`)"
       - "traefik.http.routers.hermoza-web-secure.entrypoints=websecure"
