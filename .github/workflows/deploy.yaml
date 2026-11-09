@@ -1,0 +1,68 @@
+name: Deploy Hermoza Web
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: dev
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          command_timeout: 20m
+          script: |
+            set -e
+
+            APP_DIR="/srv/docker/apps/hermoza"
+            REPO="git@github.com:EmirGuven/hermoza-web.git"
+
+            echo "📁 Preparing application directory..."
+            mkdir -p "$APP_DIR"
+            cd "$APP_DIR"
+
+            if [ ! -f .env ]; then
+              echo "❌ $APP_DIR/.env bulunamadı. .env.example'a bakarak oluşturun."
+              exit 1
+            fi
+
+            echo "📦 Checking repository..."
+            # Klasörde uploads/ ve .env zaten olduğu için clone yerine init + fetch kullanılır.
+            # git reset bu dosyalara dokunmaz (.gitignore'da).
+            if [ ! -d ".git" ]; then
+              echo "⬇️ Initializing repository..."
+              git init -q
+              git remote add origin "$REPO"
+            fi
+            echo "🔄 Pulling latest changes..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "🐳 Building and starting containers..."
+            docker compose up -d --build
+
+            echo "🩺 Waiting for health check..."
+            STATUS="starting"
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect -f '{{.State.Health.Status}}' hermoza-web 2>/dev/null || echo "starting")
+              if [ "$STATUS" = "healthy" ]; then break; fi
+              sleep 3
+            done
+            echo "Container status: $STATUS"
+            docker logs --tail 20 hermoza-web
+
+            echo "🧹 Cleaning unused docker images..."
+            docker image prune -f
+
+            echo "✅ Deploy completed successfully"

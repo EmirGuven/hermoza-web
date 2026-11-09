@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { BackgroundVideo } from "@/components/background-video";
 import { ContactForm } from "@/components/contact-form";
+import { CookieConsent } from "@/components/cookie-consent";
 import { Hero } from "@/components/hero";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { HermozaLogo } from "@/components/hermoza-logo";
@@ -10,12 +11,78 @@ import { Reveal } from "@/components/reveal";
 import { SiteHeader } from "@/components/site-header";
 import { getCollections, getJournal, getSetting } from "@/lib/content";
 import { phoneDigits } from "@/lib/content-types";
+import { SITE_URL, absUrl } from "@/lib/site";
 
 // Tüm içerik panelden (/admin) yönetilir; önbellekte tutulur, panelde kayıt yapılınca yenilenir.
 
 export async function generateMetadata(): Promise<Metadata> {
   const g = await getSetting("general");
-  return { title: g.seoTitle, description: g.seoDescription };
+  const image = g.ogImage || "/og-hermoza.jpg";
+  return {
+    title: g.seoTitle,
+    description: g.seoDescription,
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      locale: "tr_TR",
+      url: "/",
+      siteName: g.siteName,
+      title: g.seoTitle,
+      description: g.seoDescription,
+      images: [{ url: image, width: 1200, height: 630, alt: g.siteName }],
+    },
+    twitter: { card: "summary_large_image", title: g.seoTitle, description: g.seoDescription, images: [image] },
+    verification: {
+      google: g.googleVerification || undefined,
+      other: g.bingVerification ? { "msvalidate.01": g.bingVerification } : undefined,
+    },
+  };
+}
+
+/** Google ve yapay zekâ asistanları için işletme bilgisi (schema.org JSON-LD) */
+function jsonLd(
+  general: Awaited<ReturnType<typeof getSetting<"general">>>,
+  contact: Awaited<ReturnType<typeof getSetting<"contact">>>,
+  collections: Awaited<ReturnType<typeof getCollections>>
+) {
+  const sameAs = [contact.facebook, contact.instagram].filter(Boolean);
+  const business = {
+    "@type": "HomeAndConstructionBusiness",
+    "@id": `${SITE_URL}/#isletme`,
+    name: general.siteName,
+    description: general.seoDescription,
+    url: `${SITE_URL}/`,
+    logo: absUrl("/icon.png"),
+    image: absUrl(general.ogImage || "/og-hermoza.jpg"),
+    telephone: contact.phone || undefined,
+    email: contact.email || undefined,
+    address: contact.address
+      ? { "@type": "PostalAddress", streetAddress: contact.address, addressRegion: "İstanbul", addressCountry: "TR" }
+      : undefined,
+    hasMap: contact.mapsUrl || undefined,
+    areaServed: { "@type": "Country", name: "Türkiye" },
+    sameAs: sameAs.length ? sameAs : undefined,
+    hasOfferCatalog: collections.length
+      ? {
+          "@type": "OfferCatalog",
+          name: "Ölçüye özel mobilya",
+          itemListElement: collections.map((c) => ({
+            "@type": "Offer",
+            itemOffered: { "@type": "Service", name: c.title, description: c.body },
+          })),
+        }
+      : undefined,
+  };
+  const website = {
+    "@type": "WebSite",
+    "@id": `${SITE_URL}/#site`,
+    url: `${SITE_URL}/`,
+    name: general.siteName,
+    inLanguage: "tr-TR",
+    publisher: { "@id": `${SITE_URL}/#isletme` },
+  };
+  // </script> kaçışı: içerikteki "<" karakterleri güvenli hale getirilir
+  return JSON.stringify({ "@context": "https://schema.org", "@graph": [business, website] }).replace(/</g, "\\u003c");
 }
 
 function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -58,10 +125,11 @@ export default async function Home() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(general, contact, collections) }} />
       <SiteHeader general={general} contact={contact} />
 
       <main>
-        <Hero video={home.hero} />
+        <Hero video={home.hero} title={`${general.siteName} — ölçüye özel mutfak, yaşam alanı ve giyinme odası`} />
 
         {/* Koleksiyonlar */}
         {collections.length > 0 && (
@@ -254,6 +322,7 @@ export default async function Home() {
           <span className="flex flex-wrap gap-x-6 gap-y-1">
             {contact.phone && <a href={tel} className="hover:text-white">{contact.phone}</a>}
             {contact.email && <a href={`mailto:${contact.email}`} className="hover:text-white">{contact.email}</a>}
+            <a href="/cerez-politikasi" className="hover:text-white">Çerez politikası</a>
             {socials.map((s) => (
               <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="hover:text-white">
                 {s.label}
@@ -262,6 +331,8 @@ export default async function Home() {
           </span>
         </div>
       </footer>
+
+      <CookieConsent newsletterPopup={general.newsletterPopup} />
     </>
   );
 }

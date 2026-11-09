@@ -36,7 +36,8 @@ export default async function GeneralPage() {
           <div className="grid-2">
             <TextField label="Telif yazısı" name="footerCopyright" defaultValue={g.footerCopyright} />
             <div className="field" style={{ justifyContent: "flex-end", paddingBottom: 6 }}>
-              <Switch name="newsletterEnabled" label="Bülten kayıt alanını göster" defaultChecked={g.newsletterEnabled} />
+              <Switch name="newsletterEnabled" label="Footer'da bülten kayıt alanını göster" defaultChecked={g.newsletterEnabled} />
+              <Switch name="newsletterPopup" label="Bülten açılır penceresini göster (çerez onayından sonra, bir kez)" defaultChecked={g.newsletterPopup} />
             </div>
           </div>
         </div>
@@ -49,6 +50,21 @@ export default async function GeneralPage() {
             <TextField label="Sayfa başlığı" name="seoTitle" defaultValue={g.seoTitle} hint="Tarayıcı sekmesinde ve Google sonuçlarında görünür." />
           </div>
           <TextArea label="Açıklama" name="seoDescription" defaultValue={g.seoDescription} hint="Google sonuçlarında başlığın altında görünür, 150–160 karakter ideal." />
+          <div className="grid-2">
+            <MediaField name="ogImage" label="Paylaşım görseli" defaultValue={g.ogImage} hint="WhatsApp, Facebook, LinkedIn'de link paylaşılınca görünür. 1200x630 px önerilir." />
+            <div className="stack">
+              <TextField
+                label="Google Search Console doğrulama kodu"
+                name="googleVerification"
+                defaultValue={g.googleVerification}
+                hint="Search Console > Mülk ekle > HTML etiketi. Etiketin tamamını ya da sadece content değerini yapıştırın."
+              />
+              <TextField label="Bing Webmaster doğrulama kodu" name="bingVerification" defaultValue={g.bingVerification} />
+              <div className="alert alert--info">
+                Site haritası: <code>/sitemap.xml</code> · Robots: <code>/robots.txt</code> · Yapay zekâ özeti: <code>/llms.txt</code>
+              </div>
+            </div>
+          </div>
         </div>
       </Card>
 

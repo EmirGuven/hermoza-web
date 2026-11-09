@@ -14,6 +14,8 @@ import {
   LayoutDashboard,
   LayoutPanelTop,
   LogOut,
+  MailPlus,
+  Users,
   Menu,
   Moon,
   Phone,
@@ -46,8 +48,15 @@ function useNav(unread: number): NavGroup[] {
       ],
     },
     {
-      title: "Gelen Kutusu",
-      items: [{ href: "/admin/mesajlar", title: "Mesajlar", icon: Inbox, count: unread }],
+      title: "Müşteriler",
+      items: [
+        { href: "/admin/mesajlar", title: "Mesajlar & Randevular", icon: Inbox, count: unread },
+        { href: "/admin/aboneler", title: "Bülten Aboneleri", icon: Users },
+      ],
+    },
+    {
+      title: "E-posta",
+      items: [{ href: "/admin/mail-sablonlari", title: "Mail Şablonları", icon: MailPlus }],
     },
   ];
 }
@@ -59,7 +68,9 @@ const TITLES: [string, string, string][] = [
   ["/admin/medya", "İçerik", "Medya Kütüphanesi"],
   ["/admin/genel", "Site", "Header & Footer"],
   ["/admin/iletisim", "Site", "İletişim Bilgileri"],
-  ["/admin/mesajlar", "Gelen Kutusu", "Mesajlar"],
+  ["/admin/mesajlar", "Müşteriler", "Mesajlar & Randevular"],
+  ["/admin/aboneler", "Müşteriler", "Bülten Aboneleri"],
+  ["/admin/mail-sablonlari", "E-posta", "Mail Şablonları"],
   ["/admin/hesap", "Hesap", "Şifre Değiştir"],
 ];
 

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import type { VideoSet } from "@/lib/content-types";
 
 /** Sadece döngüdeki video. Videolar panelden (Ana Sayfa) seçilir. */
-export function Hero({ video }: { video: VideoSet }) {
+export function Hero({ video, title }: { video: VideoSet; title: string }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   // "Hareketi azalt" açık kullanıcılarda video oynamaz, poster görünür.
@@ -20,6 +20,8 @@ export function Hero({ video }: { video: VideoSet }) {
 
   return (
     <section className="relative h-svh min-h-[560px] w-full overflow-hidden bg-forest-deep">
+      {/* Sayfanın ana başlığı: görselde video var, arama motorları ve ekran okuyucular için metin */}
+      <h1 className="sr-only">{title}</h1>
       {video.desktop && (
         <video
           // Video değişince öğe yeniden oluşsun (source değişikliği tek başına yüklemez)

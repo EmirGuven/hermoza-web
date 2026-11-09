@@ -51,7 +51,7 @@ export const media = pgTable("media", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** İletişim formundan gelen mesajlar */
+/** İletişim formundan gelen talepler (randevu adminden verilir) */
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -59,6 +59,41 @@ export const messages = pgTable("messages", {
   phone: text("phone").notNull().default(""),
   body: text("body").notNull().default(""),
   read: boolean("read").notNull().default(false),
+  /** yeni | randevu | tamamlandi | iptal */
+  status: text("status").notNull().default("yeni"),
+  appointmentAt: timestamp("appointment_at", { withTimezone: true }),
+  appointmentNote: text("appointment_note").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Bülten aboneleri (footer, açılır pencere). token: abonelikten çıkma bağlantısı için */
+export const subscribers = pgTable("subscribers", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  source: text("source").notNull().default("footer"),
+  token: text("token").notNull().unique(),
+  unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Panelden düzenlenen mail şablonları */
+export const mailTemplates = pgTable("mail_templates", {
+  key: text("key").primaryKey(),
+  subject: text("subject").notNull(),
+  html: text("html").notNull(),
+  enabled: boolean("enabled").notNull().default(true),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Gönderilen her mailin kaydı (başarılı/başarısız) */
+export const mailLog = pgTable("mail_log", {
+  id: serial("id").primaryKey(),
+  template: text("template").notNull(),
+  to: text("to").notNull(),
+  subject: text("subject").notNull(),
+  status: text("status").notNull(), // gonderildi | hata | kapali
+  error: text("error").notNull().default(""),
+  messageId: integer("message_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

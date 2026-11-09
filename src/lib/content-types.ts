@@ -15,6 +15,14 @@ export type GeneralSettings = {
   footerLinks: NavLink[];
   footerCopyright: string;
   newsletterEnabled: boolean;
+  /** Sayfada bir süre gezinen ziyaretçiye bülten açılır penceresi */
+  newsletterPopup: boolean;
+  /** Sosyal medyada paylaşılınca görünen görsel (1200x630) */
+  ogImage: string;
+  /** Google Search Console doğrulama kodu (meta etiketindeki content değeri) */
+  googleVerification: string;
+  /** Bing Webmaster doğrulama kodu */
+  bingVerification: string;
 };
 
 export type ContactSettings = {
@@ -87,6 +95,10 @@ export const defaultGeneral: GeneralSettings = {
   ],
   footerCopyright: "© 2026 Hermoza Kitchen & Atelier",
   newsletterEnabled: true,
+  newsletterPopup: true,
+  ogImage: "/og-hermoza.jpg",
+  googleVerification: "",
+  bingVerification: "",
 };
 
 export const defaultContact: ContactSettings = {

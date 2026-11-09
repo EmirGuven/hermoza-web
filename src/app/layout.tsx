@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Montserrat, Outfit } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 
 // Logo tipografisine (Gotham benzeri geometrik sans) en yakın Google fontu
 const montserrat = Montserrat({
@@ -21,6 +22,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Paylaşım kartları ve kanonik adresler için mutlak adres tabanı
+  metadataBase: new URL(SITE_URL),
   title: "Hermoza Kitchen & Atelier — Ölçüye özel mutfak ve mobilya",
   description:
     "Mutfak, yaşam alanı ve giyinme odası için atölyede üretilen ölçüye özel masif ahşap mobilyalar.",

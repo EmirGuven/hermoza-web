@@ -1,19 +1,30 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { unlink } from "node:fs/promises";
 import { and, asc, eq, gt, sql } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { admins, collections, journalPosts, media, messages, settings } from "@/db/schema";
+import {
+  admins,
+  collections,
+  journalPosts,
+  mailTemplates,
+  media,
+  messages,
+  settings,
+  subscribers,
+} from "@/db/schema";
 import { getSession, requireAdmin } from "@/lib/session";
 import { SITE_TAG, readSetting } from "@/lib/content";
 import type { NavLink, SettingKey } from "@/lib/content-types";
 import { resolveUpload } from "@/lib/media";
+import { adminInbox, appointmentIcs, sendTemplate, siteUrl, trDate, trTime } from "@/lib/mail";
+import { SAMPLE_VARS, templateDef } from "@/lib/mail-templates";
 
-/** Bülten kayıtları mesajlar listesinde bu adla görünür */
-const NEWSLETTER_NAME = "Bülten aboneliği";
 
 export type ActionState = {
   ok?: boolean;
@@ -107,6 +118,10 @@ export async function saveGeneral(_: ActionState, f: FormData): Promise<ActionSt
     footerLinks: links(f, "footerLinks"),
     footerCopyright: str(f, "footerCopyright"),
     newsletterEnabled: bool(f, "newsletterEnabled"),
+    newsletterPopup: bool(f, "newsletterPopup"),
+    ogImage: str(f, "ogImage"),
+    googleVerification: str(f, "googleVerification").replace(/.*content="([^"]+)".*/, "$1"),
+    bingVerification: str(f, "bingVerification").replace(/.*content="([^"]+)".*/, "$1"),
   });
   return done();
 }
@@ -271,7 +286,7 @@ export async function deleteMedia(id: number): Promise<ActionState> {
   return done("Dosya silindi");
 }
 
-/* ---------------- Mesajlar ---------------- */
+/* ---------------- Mesajlar ve randevu ---------------- */
 
 export async function setMessageRead(id: number, read: boolean) {
   await requireAdmin();
@@ -283,20 +298,130 @@ export async function deleteMessage(id: number) {
   await db.delete(messages).where(eq(messages.id, id));
 }
 
-/* ---------------- Footer bülten kaydı (herkese açık) ---------------- */
+export async function setMessageStatus(id: number, status: string) {
+  await requireAdmin();
+  if (!["yeni", "randevu", "tamamlandi", "iptal"].includes(status)) return;
+  await db.update(messages).set({ status, read: true }).where(eq(messages.id, id));
+}
+
+/** Randevu tarih/saatini kaydeder ve müşteriye randevu maili (takvim davetiyle) gönderir. */
+export async function scheduleAppointment(_: ActionState, f: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const id = Number(f.get("id"));
+  const date = str(f, "date"); // 2026-11-12
+  const time = str(f, "time"); // 14:30
+  const note = str(f, "note").slice(0, 1000);
+  const notify = bool(f, "notify");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) return fail("Tarih ve saat seçin");
+  // Türkiye 2016'dan beri sabit UTC+3
+  const at = new Date(`${date}T${time}:00+03:00`);
+  if (Number.isNaN(at.getTime())) return fail("Geçersiz tarih");
+
+  const msg = await db.query.messages.findFirst({ where: eq(messages.id, id) });
+  if (!msg) return fail("Talep bulunamadı");
+  await db
+    .update(messages)
+    .set({ appointmentAt: at, appointmentNote: note, status: "randevu", read: true })
+    .where(eq(messages.id, id));
+
+  if (!notify) return done("Randevu kaydedildi");
+  if (!msg.email) return done("Randevu kaydedildi (müşterinin e-postası yok, mail gönderilmedi)");
+
+  const contact = await readSetting("contact");
+  const general = await readSetting("general");
+  const res = await sendTemplate({
+    key: "appointment_customer",
+    to: msg.email,
+    messageId: id,
+    replyTo: contact.email || undefined,
+    vars: { ad: msg.name, randevu_tarih: trDate(at), randevu_saat: trTime(at), randevu_not: note },
+    attachments: [
+      {
+        filename: "randevu.ics",
+        contentType: "text/calendar; charset=utf-8; method=PUBLISH",
+        content: appointmentIcs({
+          start: at,
+          title: `${general.siteName} randevusu`,
+          location: contact.address,
+          description: note || `${general.siteName} — ${contact.phone}`,
+        }),
+      },
+    ],
+  });
+  return res.ok
+    ? done(`Randevu kaydedildi, ${msg.email} adresine mail gönderildi`)
+    : fail(`Randevu kaydedildi ama mail gönderilemedi: ${res.error}`);
+}
+
+/* ---------------- Mail şablonları ---------------- */
+
+export async function saveTemplate(_: ActionState, f: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const key = str(f, "key");
+  if (!templateDef(key)) return fail("Şablon bulunamadı");
+  const subject = str(f, "subject");
+  const html = String(f.get("html") ?? "");
+  if (!subject || !html.trim()) return fail("Konu ve HTML boş olamaz");
+  const enabled = bool(f, "enabled");
+  await db
+    .insert(mailTemplates)
+    .values({ key, subject, html, enabled })
+    .onConflictDoUpdate({ target: mailTemplates.key, set: { subject, html, enabled, updatedAt: new Date() } });
+  return done("Şablon kaydedildi");
+}
+
+export async function resetTemplate(key: string): Promise<ActionState> {
+  await requireAdmin();
+  await db.delete(mailTemplates).where(eq(mailTemplates.key, key));
+  return done("Varsayılan şablona dönüldü");
+}
+
+export async function sendTestMail(key: string, to: string): Promise<ActionState> {
+  await requireAdmin();
+  const def = templateDef(key);
+  if (!def) return fail("Şablon bulunamadı");
+  const addr = to.trim() || adminInbox();
+  const res = await sendTemplate({
+    key: def.key,
+    to: addr,
+    vars: { ...SAMPLE_VARS, panel_url: `${siteUrl()}/admin/mesajlar`, iptal_url: `${siteUrl()}/bulten/iptal` },
+    force: true,
+  });
+  return res.ok ? done(`Test maili ${addr} adresine gönderildi`) : fail(`Gönderilemedi: ${res.error}`);
+}
+
+/* ---------------- Aboneler ---------------- */
+
+export async function deleteSubscriber(id: number) {
+  await requireAdmin();
+  await db.delete(subscribers).where(eq(subscribers.id, id));
+}
+
+/* ---------------- Bülten kaydı (herkese açık) ---------------- */
 
 export async function subscribeNewsletter(_: ActionState, f: FormData): Promise<ActionState> {
   const email = str(f, "newsletter").toLowerCase().slice(0, 160);
+  const source = str(f, "source") === "popup" ? "popup" : "footer";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("Geçerli bir e-posta yazın");
-  // Aynı adres daha önce kaydolduysa tekrar ekleme
-  const exists = await db
-    .select({ id: messages.id })
-    .from(messages)
-    .where(and(eq(messages.email, email), eq(messages.name, NEWSLETTER_NAME)))
-    .limit(1);
-  if (!exists.length) {
-    await db.insert(messages).values({ name: NEWSLETTER_NAME, email, body: "Bülten aboneliği" });
+  if (!bool(f, "consent")) return fail("Devam etmek için izin kutusunu işaretleyin");
+
+  const existing = await db.query.subscribers.findFirst({ where: eq(subscribers.email, email) });
+  if (existing && !existing.unsubscribedAt) return done("Bu adres zaten bültenimize kayıtlı. Teşekkürler!");
+
+  const token = existing?.token ?? randomBytes(24).toString("base64url");
+  if (existing) {
+    await db.update(subscribers).set({ unsubscribedAt: null, source }).where(eq(subscribers.id, existing.id));
+  } else {
+    await db.insert(subscribers).values({ email, source, token });
   }
+  // Hoş geldin maili yanıtı bekletmeden gönderilir
+  after(() =>
+    sendTemplate({
+      key: "newsletter_welcome",
+      to: email,
+      vars: { eposta: email, iptal_url: `${siteUrl()}/bulten/iptal?t=${token}` },
+    })
+  );
   return done("Teşekkürler, bültene kaydoldunuz.");
 }
 
@@ -306,17 +431,36 @@ export async function submitContact(_: ActionState, f: FormData): Promise<Action
   // Bot tuzağı: görünmez alan doluysa sessizce başarılı say
   if (str(f, "website")) return done("Mesajınız alındı");
   const name = str(f, "name").slice(0, 120);
-  const email = str(f, "email").slice(0, 160);
+  const email = str(f, "email").toLowerCase().slice(0, 160);
   const phone = str(f, "phone").slice(0, 40);
   const body = str(f, "message").slice(0, 4000);
   if (!name) return fail("Lütfen adınızı yazın");
   if (!email && !phone) return fail("Size ulaşabilmemiz için e-posta veya telefon gerekli");
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("E-posta adresi geçersiz görünüyor");
   // Aynı kişiden kısa sürede art arda gönderimi sınırla
   const recent = await db
     .select({ n: sql<number>`count(*)` })
     .from(messages)
     .where(and(eq(messages.email, email), gt(messages.createdAt, sql`now() - interval '1 minute'`)));
   if (email && Number(recent[0]?.n) > 2) return fail("Çok sık gönderim yapıldı, lütfen biraz bekleyin");
-  await db.insert(messages).values({ name, email, phone, body });
-  return done("Teşekkürler! Mesajınız alındı, en kısa sürede dönüş yapacağız.");
+
+  const [row] = await db.insert(messages).values({ name, email, phone, body }).returning();
+
+  // Mailler yanıt gönderildikten sonra gider; ziyaretçi beklemez
+  after(async () => {
+    const vars = {
+      ad: name,
+      eposta: email || "—",
+      telefon: phone || "—",
+      mesaj: body || "—",
+      tarih: trDate(row.createdAt, true),
+      panel_url: `${siteUrl()}/admin/mesajlar`,
+    };
+    await Promise.allSettled([
+      sendTemplate({ key: "contact_admin", to: adminInbox(), vars, messageId: row.id, replyTo: email || undefined }),
+      email ? sendTemplate({ key: "contact_customer", to: email, vars, messageId: row.id }) : Promise.resolve(),
+    ]);
+  });
+
+  return done("Teşekkürler! Talebiniz alındı. Size bir onay e-postası gönderdik; en kısa sürede randevu için arayacağız.");
 }

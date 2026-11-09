@@ -1,0 +1,84 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Build sırasında sunucudaki Postgres'e (127.0.0.1:5432) ulaşıp sayfaları gerçek içerikle derlemek için
+      network: host
+      secrets:
+        - database_url
+    container_name: hermoza-web
+    restart: unless-stopped
+
+    # Traefik yönlendirmesi
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+
+      # hermoza.com.tr (http + https)
+      - "traefik.http.routers.hermoza-web.rule=Host(`hermoza.com.tr`)"
+      - "traefik.http.routers.hermoza-web.entrypoints=web"
+      - "traefik.http.routers.hermoza-web.service=hermoza-web"
+
+      - "traefik.http.routers.hermoza-web-secure.rule=Host(`hermoza.com.tr`)"
+      - "traefik.http.routers.hermoza-web-secure.entrypoints=websecure"
+      - "traefik.http.routers.hermoza-web-secure.tls=true"
+      - "traefik.http.routers.hermoza-web-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hermoza-web-secure.service=hermoza-web"
+
+      # www.hermoza.com.tr -> hermoza.com.tr (ayrı router: www DNS'i henüz bu sunucuya bakmıyorsa
+      # sertifika hatası ana alan adını etkilemez)
+      - "traefik.http.routers.hermoza-www.rule=Host(`www.hermoza.com.tr`)"
+      - "traefik.http.routers.hermoza-www.entrypoints=web,websecure"
+      - "traefik.http.routers.hermoza-www.tls=true"
+      - "traefik.http.routers.hermoza-www.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hermoza-www.middlewares=hermoza-www-redirect"
+      - "traefik.http.routers.hermoza-www.service=hermoza-web"
+      - "traefik.http.middlewares.hermoza-www-redirect.redirectregex.regex=^https?://www\\.hermoza\\.com\\.tr/(.*)"
+      - "traefik.http.middlewares.hermoza-www-redirect.redirectregex.replacement=https://hermoza.com.tr/$${1}"
+      - "traefik.http.middlewares.hermoza-www-redirect.redirectregex.permanent=true"
+
+      - "traefik.http.services.hermoza-web.loadbalancer.server.port=3000"
+
+    environment:
+      NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+      UPLOAD_DIR: /app/uploads
+      SITE_URL: ${SITE_URL:-https://hermoza.com.tr}
+      # Gizli bilgiler burada değil, proje kökündeki .env dosyasında tutulur (.env.example'a bakın)
+      DATABASE_URL: ${DATABASE_URL}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      MAIL_FROM: ${MAIL_FROM}
+      MAIL_ADMIN_TO: ${MAIL_ADMIN_TO:-info@hermoza.com.tr}
+
+    volumes:
+      # Yüklenen görsel ve videolar: sunucuda /srv/docker/apps/hermoza/uploads (deploy'lar arasında kalıcı)
+      - ./uploads:/app/uploads
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    networks:
+      - proxy
+      # Paylaşılan PostgreSQL: DATABASE_URL host'u "postgres"
+      - db_internal
+
+secrets:
+  database_url:
+    environment: DATABASE_URL_BUILD
+
+networks:
+  proxy:
+    external: true
+  db_internal:
+    external: true
+    name: livaisitme_internal

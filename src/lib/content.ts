@@ -1,5 +1,5 @@
 import "server-only";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, max } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 import { db } from "@/lib/db";
 import { collections, journalPosts, settings } from "@/db/schema";
@@ -46,6 +46,18 @@ export async function readSetting<K extends SettingKey>(key: K): Promise<Setting
   } catch (e) {
     console.error(`[content] ayar okunamadı (${key}):`, (e as Error).message);
     return base;
+  }
+}
+
+/** Sitemap için içeriğin son değiştiği zaman */
+export async function getLastUpdated(): Promise<Date> {
+  "use cache";
+  cacheTag(SITE_TAG);
+  try {
+    const [row] = await db.select({ at: max(settings.updatedAt) }).from(settings);
+    return row?.at ?? new Date("2026-11-10T00:00:00+03:00");
+  } catch {
+    return new Date("2026-11-10T00:00:00+03:00");
   }
 }
 
