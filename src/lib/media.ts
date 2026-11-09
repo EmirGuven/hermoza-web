@@ -2,7 +2,8 @@ import "server-only";
 import path from "node:path";
 
 /** Yüklenen dosyaların kök klasörü. Sunucuda Docker volume olarak bağlanır. */
-export const UPLOAD_ROOT = path.resolve(process.cwd(), process.env.UPLOAD_DIR ?? "uploads");
+// turbopackIgnore: build, bu çalışma zamanı klasörünü izleyip tüm projeyi imaja katmasın
+export const UPLOAD_ROOT = path.resolve(/*turbopackIgnore: true*/ process.cwd(), process.env.UPLOAD_DIR ?? "uploads");
 
 const MIME: Record<string, string> = {
   ".jpg": "image/jpeg",
