@@ -1,19 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { VideoSet } from "@/lib/content-types";
 
 /**
  * Arka plan videosu: ekrana yaklaşınca yüklenip oynar, ekrandan çıkınca durur.
  * "Hareketi azalt" açık kullanıcılarda sadece poster görünür.
  */
-export function BackgroundVideo({
-  name,
-  className = "",
-}: {
-  /** public/uploads/videos/{name}-1080.mp4, -720.mp4, -poster.jpg */
-  name: string;
-  className?: string;
-}) {
+export function BackgroundVideo({ video, className = "" }: { video: VideoSet; className?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -37,22 +31,30 @@ export function BackgroundVideo({
     );
     io.observe(v);
     return () => io.disconnect();
-  }, []);
+  }, [video.desktop, video.mobile]);
 
-  const base = `/uploads/videos/${name}`;
+  if (!video.desktop) {
+    // Video yoksa sadece poster (varsa) arka plan olur
+    return video.poster ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={video.poster} alt="" className={`absolute inset-0 h-full w-full object-cover ${className}`} />
+    ) : null;
+  }
+
   return (
     <video
+      key={video.desktop + video.mobile}
       ref={ref}
       className={`absolute inset-0 h-full w-full object-cover ${className}`}
-      poster={`${base}-poster.jpg`}
+      poster={video.poster || undefined}
       muted
       loop
       playsInline
       preload="none"
       aria-hidden
     >
-      <source src={`${base}-720.mp4`} type="video/mp4" media="(max-width: 767px)" />
-      <source src={`${base}-1080.mp4`} type="video/mp4" />
+      {video.mobile && <source src={video.mobile} type="video/mp4" media="(max-width: 767px)" />}
+      <source src={video.desktop} type={video.desktop.endsWith(".webm") ? "video/webm" : "video/mp4"} />
     </video>
   );
 }

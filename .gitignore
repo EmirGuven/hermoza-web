@@ -41,4 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 # medya dosyaları sunucuda /srv/docker/apps/hermoza/uploads içinde tutulur
-/public/uploads
+/uploads

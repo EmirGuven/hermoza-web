@@ -5,17 +5,18 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { HermozaLogo } from "@/components/hermoza-logo";
-import { contact } from "@/lib/contact";
-
-const links = [
-  { href: "#koleksiyonlar", label: "Koleksiyonlar" },
-  { href: "#journal", label: "Journal" },
-  { href: "#iletisim", label: "İletişim" },
-];
+import { phoneDigits, type ContactSettings, type GeneralSettings } from "@/lib/content-types";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-export function SiteHeader() {
+export function SiteHeader({
+  general,
+  contact,
+}: {
+  general: GeneralSettings;
+  contact: ContactSettings;
+}) {
+  const links = general.menuLinks;
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -55,8 +56,8 @@ export function SiteHeader() {
         </button>
         <a href="#" aria-label="Hermoza ana sayfa">
           <Image
-            src="/uploads/brand/hermoza-icon-white.png"
-            alt="Hermoza"
+            src={general.logo}
+            alt={general.siteName}
             width={212}
             height={522}
             priority
@@ -64,11 +65,10 @@ export function SiteHeader() {
           />
         </a>
         <a
-          href="#iletisim"
+          href={general.headerCtaHref}
           className="justify-self-end text-[11px] uppercase tracking-[0.3em] text-white/70 transition-colors hover:text-white"
         >
-          <span className="hidden sm:inline">Randevu al</span>
-          <span className="sm:hidden">İletişim</span>
+          {general.headerCtaLabel}
         </a>
       </header>
 
@@ -100,7 +100,7 @@ export function SiteHeader() {
                 <ul className="space-y-2 md:space-y-4">
                   {links.map((l, i) => (
                     <motion.li
-                      key={l.href}
+                      key={l.href + l.label}
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 + i * 0.07, duration: 0.8, ease: EASE }}
@@ -120,18 +120,24 @@ export function SiteHeader() {
                 </ul>
               </nav>
               <div className="flex flex-wrap gap-x-10 gap-y-2 text-xs font-light tracking-wide text-white/50">
-                <a href={contact.emailHref} className="hover:text-white">{contact.email}</a>
-                <a href={contact.phoneHref} className="hover:text-white">{contact.phone}</a>
+                {contact.email && (
+                  <a href={`mailto:${contact.email}`} className="hover:text-white">{contact.email}</a>
+                )}
+                {contact.phone && (
+                  <a href={`tel:+${phoneDigits(contact.phone)}`} className="hover:text-white">{contact.phone}</a>
+                )}
               </div>
             </div>
             <div className="relative hidden md:block">
+              {general.menuImage && (
               <Image
-                src="/uploads/images/proje-bodrum-yazlik.jpg"
+                src={general.menuImage}
                 alt=""
                 fill
                 sizes="45vw"
                 className="object-cover"
               />
+              )}
               <div className="absolute inset-0 bg-forest-deep/30" />
             </div>
           </motion.div>

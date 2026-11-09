@@ -1,53 +1,21 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { BackgroundVideo } from "@/components/background-video";
+import { ContactForm } from "@/components/contact-form";
 import { Hero } from "@/components/hero";
-import { contact } from "@/lib/contact";
 import { HermozaLogo } from "@/components/hermoza-logo";
 import { Reveal } from "@/components/reveal";
 import { SiteHeader } from "@/components/site-header";
+import { getCollections, getJournal, getSetting } from "@/lib/content";
+import { phoneDigits } from "@/lib/content-types";
 
-// Görseller sunucuda /srv/docker/apps/hermoza/uploads/images altında; lokalde public/uploads/images.
-const img = (name: string) => `/uploads/images/${name}.jpg`;
+// Tüm içerik panelden (/admin) yönetilir; önbellekte tutulur, panelde kayıt yapılınca yenilenir.
 
-const collections = [
-  {
-    no: "01",
-    title: "Mutfak",
-    text: "Masif kapaklar, doğal taş tezgâhlar ve her çekmecesi kullanıma göre planlanmış iç düzen.",
-    img: img("koleksiyon-mutfak"),
-  },
-  {
-    no: "02",
-    title: "Yaşam Alanı",
-    text: "Kitaplıklar, TV duvarları ve konsollar; mekânın mimarisiyle bütünleşen ahşap yüzeyler.",
-    img: img("koleksiyon-yasam-alani"),
-  },
-  {
-    no: "03",
-    title: "Giyinme Odası",
-    text: "Gömme dolaplar ve giyinme odaları; sessiz kapanan kapaklar, gizli aydınlatma.",
-    img: img("koleksiyon-giyinme-odasi"),
-  },
-];
-
-const journal = [
-  {
-    cat: "Malzeme",
-    title: "Masif ceviz neden yıllar geçtikçe güzelleşir?",
-    img: img("journal-ceviz"),
-  },
-  {
-    cat: "Proje",
-    title: "Zekeriyaköy’de taş ve ahşabın buluştuğu bir mutfak",
-    img: img("journal-zekeriyakoy"),
-  },
-  {
-    cat: "Rehber",
-    title: "Ada mutfak planlarken dikkat edilmesi gereken 5 ölçü",
-    img: img("journal-ada-mutfak"),
-  },
-];
+export async function generateMetadata(): Promise<Metadata> {
+  const g = await getSetting("general");
+  return { title: g.seoTitle, description: g.seoDescription };
+}
 
 function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
@@ -57,182 +25,199 @@ function Eyebrow({ children, className = "" }: { children: React.ReactNode; clas
   );
 }
 
-export default function Home() {
+/** Başlıktaki vurgulanacak kısmı renklendirir */
+function Highlighted({ text, highlight }: { text: string; highlight: string }) {
+  if (!highlight || !text.includes(highlight)) return <>{text}</>;
+  const i = text.indexOf(highlight);
   return (
     <>
-      <SiteHeader />
+      {text.slice(0, i)}
+      <span className="text-clay">{highlight}</span>
+      {text.slice(i + highlight.length)}
+    </>
+  );
+}
+
+const isExternal = (href: string) => /^https?:\/\//.test(href);
+
+export default async function Home() {
+  const [general, contact, home, collections, journal] = await Promise.all([
+    getSetting("general"),
+    getSetting("contact"),
+    getSetting("home"),
+    getCollections(),
+    getJournal(),
+  ]);
+  const tel = contact.phone ? `tel:+${phoneDigits(contact.phone)}` : "";
+  const socials = [
+    { label: "Facebook", href: contact.facebook },
+    { label: "Instagram", href: contact.instagram },
+    { label: "WhatsApp", href: contact.whatsapp ? `https://wa.me/${phoneDigits(contact.whatsapp)}` : "" },
+  ].filter((s) => s.href);
+
+  return (
+    <>
+      <SiteHeader general={general} contact={contact} />
 
       <main>
-        <Hero />
+        <Hero video={home.hero} />
 
-        {/* Collections */}
-        <section id="koleksiyonlar" className="bg-white">
-          {collections.map((c, i) => (
-            <article
-              key={c.title}
-              className="grid items-stretch md:grid-cols-2"
-            >
-              <div className={`relative aspect-[4/3] md:aspect-auto md:min-h-[640px] ${i % 2 ? "md:order-2" : ""}`}>
-                <Image
-                  src={c.img}
-                  alt={`Hermoza ${c.title} koleksiyonu`}
-                  fill
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  className="object-cover"
-                />
-              </div>
-              <Reveal className="flex flex-col justify-center px-6 py-16 md:px-20">
-                <span className="mb-8 text-sm font-light tracking-[0.3em] text-clay">{c.no}</span>
-                <h2 className="mb-6 text-4xl font-extralight uppercase tracking-[0.15em] text-forest md:text-5xl">
-                  {c.title}
-                </h2>
-                <p className="mb-10 max-w-md font-light leading-relaxed text-ink/60">{c.text}</p>
-                <a
-                  href="#iletisim"
-                  className="group inline-flex w-fit items-center gap-3 border-b border-forest/30 pb-2 text-[11px] uppercase tracking-[0.3em] text-forest transition-colors hover:border-rust hover:text-rust"
-                >
-                  Keşfet
-                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
-                </a>
-              </Reveal>
-            </article>
-          ))}
-        </section>
+        {/* Koleksiyonlar */}
+        {collections.length > 0 && (
+          <section id="koleksiyonlar" className="bg-white">
+            {collections.map((c, i) => (
+              <article key={c.id} className="grid items-stretch md:grid-cols-2">
+                <div className={`relative aspect-[4/3] bg-clay/20 md:aspect-auto md:min-h-[640px] ${i % 2 ? "md:order-2" : ""}`}>
+                  {c.image && (
+                    <Image
+                      src={c.image}
+                      alt={`${general.siteName} ${c.title}`}
+                      fill
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+                <Reveal className="flex flex-col justify-center px-6 py-16 md:px-20">
+                  <span className="mb-8 text-sm font-light tracking-[0.3em] text-clay">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h2 className="mb-6 text-4xl font-extralight uppercase tracking-[0.15em] text-forest md:text-5xl">
+                    {c.title}
+                  </h2>
+                  <p className="mb-10 max-w-md font-light leading-relaxed text-ink/60">{c.body}</p>
+                  {c.linkLabel && c.linkHref && (
+                    <a
+                      href={c.linkHref}
+                      {...(isExternal(c.linkHref) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      className="group inline-flex w-fit items-center gap-3 border-b border-forest/30 pb-2 text-[11px] uppercase tracking-[0.3em] text-forest transition-colors hover:border-rust hover:text-rust"
+                    >
+                      {c.linkLabel}
+                      <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+                    </a>
+                  )}
+                </Reveal>
+              </article>
+            ))}
+          </section>
+        )}
 
-        {/* Bespoke band */}
+        {/* Video bandı */}
         <section className="relative flex min-h-[80svh] items-center justify-center overflow-hidden text-center text-white">
-          <BackgroundVideo name="bespoke" />
+          <BackgroundVideo video={home.bespoke.video} />
           <div className="absolute inset-0 bg-forest-deep/70" />
           <div className="relative px-6">
-            <Eyebrow className="text-clay">Bespoke</Eyebrow>
+            {home.bespoke.eyebrow && <Eyebrow className="text-clay">{home.bespoke.eyebrow}</Eyebrow>}
             <h2 className="mx-auto mb-8 max-w-4xl text-2xl font-extralight leading-relaxed tracking-wide md:text-4xl">
-              Bir mobilyanın değeri, yıllar sonra bile ilk günkü gibi kapanan bir
-              kapakta gizlidir. Biz o kapağı <span className="text-clay">ölçüyle,
-              sabırla ve elle</span> yapıyoruz.
+              <Highlighted text={home.bespoke.heading} highlight={home.bespoke.highlight} />
             </h2>
-            <p className="mx-auto mb-12 max-w-lg font-light text-white/70">
-              Katalogdan seçmek yerine mekânınız için sıfırdan çizilen
-              mobilyalar. Her proje tek, her parça imzalı.
-            </p>
-            <a
-              href="#iletisim"
-              className="inline-flex items-center gap-3 border border-white/40 px-9 py-4 text-xs uppercase tracking-[0.3em] transition-colors hover:bg-white hover:text-forest"
-            >
-              Projenizi anlatın
-            </a>
+            {home.bespoke.text && (
+              <p className="mx-auto mb-12 max-w-lg font-light text-white/70">{home.bespoke.text}</p>
+            )}
+            {home.bespoke.buttonLabel && (
+              <a
+                href={home.bespoke.buttonHref || "#iletisim"}
+                className="inline-flex items-center gap-3 border border-white/40 px-9 py-4 text-xs uppercase tracking-[0.3em] transition-colors hover:bg-white hover:text-forest"
+              >
+                {home.bespoke.buttonLabel}
+              </a>
+            )}
           </div>
         </section>
 
         {/* Journal */}
-        <section id="journal" className="mx-auto max-w-7xl px-6 py-28 md:px-12 md:py-36">
-          <div className="mb-14 flex items-end justify-between gap-6">
-            <div>
-              <Eyebrow className="text-rust">Journal</Eyebrow>
+        {journal.length > 0 && (
+          <section id="journal" className="mx-auto max-w-7xl px-6 py-28 md:px-12 md:py-36">
+            <div className="mb-14">
+              <Eyebrow className="text-rust">{home.journal.eyebrow}</Eyebrow>
               <h2 className="text-4xl font-extralight uppercase tracking-[0.15em] text-forest md:text-5xl">
-                Atölyeden notlar
+                {home.journal.title}
               </h2>
             </div>
-            <a
-              href="#journal"
-              className="hidden border-b border-forest/30 pb-2 text-[11px] uppercase tracking-[0.3em] text-forest transition-colors hover:border-rust hover:text-rust md:inline"
-            >
-              Tümü
-            </a>
-          </div>
-          <div className="grid gap-10 md:grid-cols-3">
-            {journal.map((j, i) => (
-              <Reveal key={j.title} delay={i * 0.12}>
-                <article className="group">
-                  <div className="relative mb-6 aspect-[4/3] overflow-hidden bg-clay/30">
-                    <Image
-                      src={j.img}
-                      alt=""
-                      fill
-                      sizes="(min-width: 768px) 30vw, 100vw"
-                      className="object-cover transition-transform duration-[1.2s] group-hover:scale-105"
-                    />
-                  </div>
-                  <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-clay">{j.cat}</p>
-                  <h3 className="mb-3 text-lg font-light leading-snug text-forest">{j.title}</h3>
-                  <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-ink/50 transition-colors group-hover:text-rust">
-                    Oku <ArrowRight className="size-3.5" />
-                  </span>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-        </section>
+            <div className="grid gap-10 md:grid-cols-3">
+              {journal.slice(0, 3).map((j, i) => {
+                const card = (
+                  <article className="group">
+                    <div className="relative mb-6 aspect-[4/3] overflow-hidden bg-clay/30">
+                      {j.image && (
+                        <Image
+                          src={j.image}
+                          alt=""
+                          fill
+                          sizes="(min-width: 768px) 30vw, 100vw"
+                          className="object-cover transition-transform duration-[1.2s] group-hover:scale-105"
+                        />
+                      )}
+                    </div>
+                    {j.category && (
+                      <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-clay">{j.category}</p>
+                    )}
+                    <h3 className="mb-3 text-lg font-light leading-snug text-forest">{j.title}</h3>
+                    {j.href && (
+                      <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-ink/50 transition-colors group-hover:text-rust">
+                        Oku <ArrowRight className="size-3.5" />
+                      </span>
+                    )}
+                  </article>
+                );
+                return (
+                  <Reveal key={j.id} delay={i * 0.12}>
+                    {j.href ? (
+                      <a href={j.href} {...(isExternal(j.href) ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+                        {card}
+                      </a>
+                    ) : (
+                      card
+                    )}
+                  </Reveal>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
-        {/* Contact */}
+        {/* İletişim */}
         <section id="iletisim" className="bg-forest text-white">
           <div className="mx-auto grid max-w-7xl gap-16 px-6 py-28 md:grid-cols-2 md:px-12 md:py-36">
             <div>
-              <Eyebrow className="text-clay">İletişim</Eyebrow>
-              <h2 className="mb-8 text-4xl font-extralight uppercase tracking-[0.15em] md:text-5xl">
-                Showroom’da
-                <br />
-                buluşalım
+              <Eyebrow className="text-clay">{home.contact.eyebrow}</Eyebrow>
+              <h2 className="mb-8 max-w-md text-4xl font-extralight uppercase tracking-[0.15em] md:text-5xl">
+                {home.contact.title}
               </h2>
-              <p className="mb-12 max-w-md font-light text-white/65">
-                Malzemelere dokunmak, numuneleri görmek ve projenizi konuşmak
-                için randevu oluşturun. 48 saat içinde dönüş yapıyoruz.
-              </p>
+              <p className="mb-12 max-w-md font-light text-white/65">{home.contact.text}</p>
               <ul className="space-y-5 text-sm font-light text-white/80">
-                <li>
-                  <a href={contact.mapsHref} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 transition-colors hover:text-clay">
-                    <MapPin className="mt-0.5 size-4 shrink-0 text-clay" strokeWidth={1.5} />
-                    {contact.address}
-                  </a>
-                </li>
-                <li>
-                  <a href={contact.phoneHref} className="flex items-center gap-4 transition-colors hover:text-clay">
-                    <Phone className="size-4 shrink-0 text-clay" strokeWidth={1.5} />
-                    {contact.phone}
-                  </a>
-                </li>
-                <li>
-                  <a href={contact.emailHref} className="flex items-center gap-4 transition-colors hover:text-clay">
-                    <Mail className="size-4 shrink-0 text-clay" strokeWidth={1.5} />
-                    {contact.email}
-                  </a>
-                </li>
+                {contact.address && (
+                  <li>
+                    <a
+                      href={contact.mapsUrl || undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-start gap-4 transition-colors hover:text-clay"
+                    >
+                      <MapPin className="mt-0.5 size-4 shrink-0 text-clay" strokeWidth={1.5} />
+                      {contact.address}
+                    </a>
+                  </li>
+                )}
+                {contact.phone && (
+                  <li>
+                    <a href={tel} className="flex items-center gap-4 transition-colors hover:text-clay">
+                      <Phone className="size-4 shrink-0 text-clay" strokeWidth={1.5} />
+                      {contact.phone}
+                    </a>
+                  </li>
+                )}
+                {contact.email && (
+                  <li>
+                    <a href={`mailto:${contact.email}`} className="flex items-center gap-4 transition-colors hover:text-clay">
+                      <Mail className="size-4 shrink-0 text-clay" strokeWidth={1.5} />
+                      {contact.email}
+                    </a>
+                  </li>
+                )}
               </ul>
             </div>
-            <form className="space-y-8">
-              {[
-                { name: "name", label: "Ad soyad", type: "text" },
-                { name: "email", label: "E-posta", type: "email" },
-                { name: "phone", label: "Telefon", type: "tel" },
-              ].map((f) => (
-                <label key={f.name} className="block">
-                  <span className="mb-2 block text-[10px] uppercase tracking-[0.35em] text-white/50">
-                    {f.label}
-                  </span>
-                  <input
-                    name={f.name}
-                    type={f.type}
-                    className="w-full border-b border-white/25 bg-transparent py-3 font-light outline-none transition-colors focus:border-clay"
-                  />
-                </label>
-              ))}
-              <label className="block">
-                <span className="mb-2 block text-[10px] uppercase tracking-[0.35em] text-white/50">
-                  Projeniz
-                </span>
-                <textarea
-                  name="message"
-                  rows={3}
-                  className="w-full resize-none border-b border-white/25 bg-transparent py-3 font-light outline-none transition-colors focus:border-clay"
-                />
-              </label>
-              <button
-                type="submit"
-                className="group inline-flex items-center gap-3 bg-rust px-10 py-4 text-xs uppercase tracking-[0.3em] transition-colors hover:bg-rust/85"
-              >
-                Gönder
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-              </button>
-            </form>
+            <ContactForm />
           </div>
         </section>
       </main>
@@ -241,31 +226,49 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl flex-col gap-12 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
             <HermozaLogo />
-            <p className="mb-4 mt-10 text-[10px] uppercase tracking-[0.35em] text-clay">Bülten</p>
-            <form className="flex border-b border-white/25 focus-within:border-clay">
-              <input
-                type="email"
-                name="newsletter"
-                placeholder="E-posta adresiniz"
-                aria-label="E-posta adresiniz"
-                className="w-full bg-transparent py-3 text-sm font-light outline-none placeholder:text-white/35"
-              />
-              <button type="submit" aria-label="Bültene kaydol" className="px-2 text-white/60 hover:text-clay">
-                <ArrowRight className="size-4" />
-              </button>
-            </form>
+            {general.newsletterEnabled && (
+              <>
+                <p className="mb-4 mt-10 text-[10px] uppercase tracking-[0.35em] text-clay">Bülten</p>
+                <form className="flex border-b border-white/25 focus-within:border-clay">
+                  <input
+                    type="email"
+                    name="newsletter"
+                    placeholder="E-posta adresiniz"
+                    aria-label="E-posta adresiniz"
+                    className="w-full bg-transparent py-3 text-sm font-light outline-none placeholder:text-white/35"
+                  />
+                  <button type="submit" aria-label="Bültene kaydol" className="px-2 text-white/60 hover:text-clay">
+                    <ArrowRight className="size-4" />
+                  </button>
+                </form>
+              </>
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-x-16 gap-y-3 text-[11px] uppercase tracking-[0.3em] text-white/55">
-            <a href="#koleksiyonlar" className="hover:text-white">Koleksiyonlar</a>
-            <a href="#iletisim" className="hover:text-white">İletişim</a>
-          </div>
+          {general.footerLinks.length > 0 && (
+            <div className="grid grid-cols-2 gap-x-16 gap-y-3 text-[11px] uppercase tracking-[0.3em] text-white/55">
+              {general.footerLinks.map((l) => (
+                <a
+                  key={l.href + l.label}
+                  href={l.href}
+                  {...(isExternal(l.href) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="hover:text-white"
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
         <div className="mx-auto mt-16 flex max-w-7xl flex-col justify-between gap-2 border-t border-white/10 pt-6 text-xs font-light text-white/40 md:flex-row">
-          <span>© 2026 Hermoza Wood Industry</span>
+          <span>{general.footerCopyright}</span>
           <span className="flex flex-wrap gap-x-6 gap-y-1">
-            <a href={contact.phoneHref} className="hover:text-white">{contact.phone}</a>
-            <a href={contact.emailHref} className="hover:text-white">{contact.email}</a>
-            <a href={contact.facebookHref} target="_blank" rel="noopener noreferrer" className="hover:text-white">Facebook</a>
+            {contact.phone && <a href={tel} className="hover:text-white">{contact.phone}</a>}
+            {contact.email && <a href={`mailto:${contact.email}`} className="hover:text-white">{contact.email}</a>}
+            {socials.map((s) => (
+              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                {s.label}
+              </a>
+            ))}
           </span>
         </div>
       </footer>

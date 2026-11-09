@@ -2,7 +2,7 @@
 # Hero videosunu web için sıkıştırır.
 # Kullanım:  npm run video:hero -- /yol/ham-video.mp4
 #
-# Üretilen dosyalar (public/uploads/videos/):
+# Üretilen dosyalar (uploads/videos/):
 #   hero-1080.webm  -> masaüstü, VP9 (Chrome/Firefox/Edge — en küçük dosya)
 #   hero-1080.mp4   -> masaüstü, H.264 (Safari ve yedek)
 #   hero-720.mp4    -> mobil, H.264
@@ -12,7 +12,7 @@
 set -euo pipefail
 
 IN="${1:?Kullanım: npm run video:hero -- /yol/video.mp4}"
-OUT="$(cd "$(dirname "$0")/.." && pwd)/public/uploads/videos"
+OUT="$(cd "$(dirname "$0")/.." && pwd)/uploads/videos"
 MAX_SECONDS="${MAX_SECONDS:-20}"
 mkdir -p "$OUT"
 
