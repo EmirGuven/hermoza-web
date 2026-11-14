@@ -264,6 +264,78 @@
   }
 }
 
+/* Mobil: masaüstündeki gibi yan yana. Açık panel geniş, kapalılar ince dikey şerit; dokununca açılır */
+@media (max-width: 767px) {
+  .cx {
+    display: flex;
+    gap: 4px;
+    height: min(74svh, 600px);
+  }
+  .cx-item {
+    flex: 0 0 52px;
+    height: auto;
+    min-width: 0;
+    transition: flex 0.9s var(--cx-ease);
+  }
+  .cx-item[data-open] {
+    flex: 1 1 auto;
+  }
+  .cx-img {
+    transform: scale(1.14);
+    filter: saturate(0.7) brightness(0.75);
+  }
+  .cx-shade {
+    background-color: rgb(13 38 34 / 0.5);
+  }
+  .cx-rail {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 0;
+    transition: opacity 0.4s var(--cx-ease);
+  }
+  .cx-rail-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: 200;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+  .cx-body {
+    width: calc(100vw - 32px - 2 * 56px);
+    max-width: 30rem;
+    padding: 24px 20px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s var(--cx-ease), transform 0.6s var(--cx-ease);
+    pointer-events: none;
+  }
+
+  /* Açık panel */
+  .cx-item[data-open] .cx-img {
+    transform: scale(1);
+    filter: none;
+  }
+  .cx-item[data-open] .cx-shade {
+    background-color: rgb(13 38 34 / 0);
+  }
+  .cx-item[data-open] .cx-rail {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .cx-item[data-open] .cx-body {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.3s;
+    pointer-events: auto;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cx-item,
   .cx-img,

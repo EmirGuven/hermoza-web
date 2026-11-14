@@ -1,4 +1,5 @@
-import { mkdir, stat, writeFile } from "node:fs/promises";
+import { mkdir, stat, unlink, writeFile } from "node:fs/promises";
+import { eq } from "drizzle-orm";
 import path from "node:path";
 import { db } from "@/lib/db";
 import { media } from "@/db/schema";
@@ -33,16 +34,18 @@ export async function POST(req: Request) {
 
     const dir = kind === "video" ? "videos" : "images";
     const { base, ext } = slugifyFileName(file.name);
-    // Aynı ad varsa sonuna -2, -3 … ekle
+    // Aynı ad diskte ya da medya kaydında varsa sonuna -2, -3 … ekle.
+    // Veritabanına da bakılır: localhost canlı veritabanına bağlıyken yüklenen bir dosyanın kaydı
+    // canlıda olup dosyası olmayabilir; yalnızca diske bakmak "media_path_unique" hatasına yol açar.
     let rel = `${dir}/${base}${ext}`;
     for (let i = 2; ; i++) {
       const full = resolveUpload(rel)!;
-      try {
-        await stat(full);
-        rel = `${dir}/${base}-${i}${ext}`;
-      } catch {
-        break;
-      }
+      const onDisk = await stat(full).then(() => true, () => false);
+      const inDb = onDisk
+        ? true
+        : !!(await db.query.media.findFirst({ columns: { id: true }, where: eq(media.path, rel) }));
+      if (!onDisk && !inDb) break;
+      rel = `${dir}/${base}-${i}${ext}`;
     }
     const full = resolveUpload(rel);
     if (!full) return Response.json({ error: "Geçersiz dosya adı" }, { status: 400 });
@@ -53,10 +56,18 @@ export async function POST(req: Request) {
     const data = kind === "image" ? await compressImage(original, ext) : original;
     await writeFile(full, data);
 
-    const [row] = await db
-      .insert(media)
-      .values({ path: rel, kind, mime: mimeOf(rel), size: data.length, originalName: file.name })
-      .returning();
+    let row;
+    try {
+      [row] = await db
+        .insert(media)
+        .values({ path: rel, kind, mime: mimeOf(rel), size: data.length, originalName: file.name })
+        .returning();
+    } catch (e) {
+      // Kayıt olmadıysa diskte sahipsiz dosya bırakma
+      await unlink(full).catch(() => {});
+      console.error("[upload] medya kaydı oluşturulamadı:", (e as Error).message);
+      return Response.json({ error: `${file.name}: kaydedilemedi, lütfen tekrar deneyin` }, { status: 500 });
+    }
     saved.push({ ...row, url: mediaUrl(rel) });
   }
 

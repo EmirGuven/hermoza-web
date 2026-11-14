@@ -45,7 +45,7 @@ export async function GET(
 ) {
   const { path: parts } = await params;
   const file = resolveUpload(parts.map(decodeURIComponent).join("/"));
-  if (!file) return new Response("Geçersiz yol", { status: 400 });
+  if (!file) return new Response("Geçersiz yol", { status: 400, headers: { "Cache-Control": "no-store" } });
 
   let size: number;
   let mtime: Date;
@@ -55,7 +55,8 @@ export async function GET(
     size = s.size;
     mtime = s.mtime;
   } catch {
-    return new Response("Bulunamadı", { status: 404 });
+    // 404 önbelleğe alınmasın: Cloudflare aksi halde saatlerce "yok" der, sonradan yüklenen dosya görünmez
+    return new Response("Bulunamadı", { status: 404, headers: { "Cache-Control": "no-store" } });
   }
 
   const etag = `W/"${size.toString(16)}-${mtime.getTime().toString(16)}"`;

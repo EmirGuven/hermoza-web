@@ -203,22 +203,22 @@ export default async function Home() {
         )}
 
         {/* İletişim */}
-        <section id="iletisim" className="bg-forest text-white">
+        <section id="iletisim" className="border-t border-forest/10 bg-white text-ink">
           <div className="mx-auto grid max-w-7xl gap-16 px-6 py-28 md:grid-cols-2 md:px-12 md:py-36">
             <div>
-              <Eyebrow className="text-clay">{home.contact.eyebrow}</Eyebrow>
-              <h2 className="mb-8 max-w-md text-4xl font-extralight uppercase tracking-[0.15em] md:text-5xl">
+              <Eyebrow className="text-rust">{home.contact.eyebrow}</Eyebrow>
+              <h2 className="mb-8 max-w-md text-4xl font-extralight uppercase tracking-[0.15em] text-forest md:text-5xl">
                 {home.contact.title}
               </h2>
-              <p className="mb-12 max-w-md font-light text-white/65">{home.contact.text}</p>
-              <ul className="space-y-5 text-sm font-light text-white/80">
+              <p className="mb-12 max-w-md font-light text-ink/60">{home.contact.text}</p>
+              <ul className="space-y-5 text-sm font-light text-ink/75">
                 {contact.address && (
                   <li>
                     <a
                       href={contact.mapsUrl || undefined}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-start gap-4 transition-colors hover:text-clay"
+                      className="flex items-start gap-4 transition-colors hover:text-rust"
                     >
                       <MapPin className="mt-0.5 size-4 shrink-0 text-clay" strokeWidth={1.5} />
                       {contact.address}
@@ -227,7 +227,7 @@ export default async function Home() {
                 )}
                 {contact.phone && (
                   <li>
-                    <a href={tel} className="flex items-center gap-4 transition-colors hover:text-clay">
+                    <a href={tel} className="flex items-center gap-4 transition-colors hover:text-rust">
                       <Phone className="size-4 shrink-0 text-clay" strokeWidth={1.5} />
                       {contact.phone}
                     </a>
@@ -235,7 +235,7 @@ export default async function Home() {
                 )}
                 {contact.email && (
                   <li>
-                    <a href={`mailto:${contact.email}`} className="flex items-center gap-4 transition-colors hover:text-clay">
+                    <a href={`mailto:${contact.email}`} className="flex items-center gap-4 transition-colors hover:text-rust">
                       <Mail className="size-4 shrink-0 text-clay" strokeWidth={1.5} />
                       {contact.email}
                     </a>

@@ -4,7 +4,7 @@
 .adm {
   color-scheme: light;
   --primary-rgb: 21, 58, 52; /* #153a34 orman yeşili */
-  --accent-rgb: 179, 74, 37; /* #b34a25 kiremit */
+  --accent-rgb: 21, 58, 52; /* #153a34 orman yeşili (sitedeki yeşil) */
   --success-rgb: 30, 128, 84;
   --danger-rgb: 196, 50, 40;
   --warning-rgb: 196, 128, 8;
@@ -15,7 +15,7 @@
   --primary-soft: rgba(var(--primary-rgb), 0.08);
   --accent: rgb(var(--accent-rgb));
   --accent-soft: rgba(var(--accent-rgb), 0.1);
-  --accent-ink: #8f3a1c;
+  --accent-ink: #0d2622;
   --success: rgb(var(--success-rgb));
   --success-soft: rgba(var(--success-rgb), 0.12);
   --danger: rgb(var(--danger-rgb));
@@ -35,7 +35,7 @@
   --muted: #72757d;
   --hover: #f6f3ef;
   --link: var(--primary);
-  --row-selected: #f8ece6;
+  --row-selected: #e9f0ee;
   --scrim: rgba(13, 38, 34, 0.5);
 
   --menu-bg: #ffffff;
@@ -64,11 +64,11 @@
 .adm[data-theme="dark"] {
   color-scheme: dark;
   --primary-rgb: 74, 150, 132;
-  --accent-rgb: 222, 120, 78;
+  --accent-rgb: 94, 174, 154;
   --primary-hover: #5eae9a;
-  --accent-ink: #eea27f;
+  --accent-ink: #8fcbbb;
   --link: #8fcbbb;
-  --row-selected: #33221a;
+  --row-selected: #16302a;
   --scrim: rgba(0, 0, 0, 0.7);
   --bg: #09090b;
   --surface: #131315;
