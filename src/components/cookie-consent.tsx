@@ -82,6 +82,9 @@ function Toggle({
 /** Microsoft Clarity: yalnızca "ölçüm" onayı varsa, ayrı parça olarak ve bir kez yüklenir */
 let clarityStarted = false;
 function startClarity(id: string) {
+  // Yalnızca canlı sitede: localhost ve önizleme ziyaretleri Clarity verisini kirletmesin
+  const host = window.location.hostname;
+  if (host === "localhost" || host === "127.0.0.1" || host.endsWith(".local")) return;
   if (clarityStarted || !id) return;
   clarityStarted = true;
   import("@microsoft/clarity")
