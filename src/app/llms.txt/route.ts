@@ -1,4 +1,4 @@
-import { getCollections, getJournal, getSetting } from "@/lib/content";
+import { getCollections, getPosts, getSetting } from "@/lib/content";
 import { SITE_URL } from "@/lib/site";
 
 // GEO (Generative Engine Optimization): ChatGPT, Perplexity, Gemini gibi yapay zekâ asistanlarının
@@ -9,7 +9,7 @@ export async function GET() {
     getSetting("contact"),
     getSetting("home"),
     getCollections(),
-    getJournal(),
+    getPosts(),
   ]);
 
   const lines = [
@@ -38,9 +38,16 @@ export async function GET() {
     "",
     "## Sayfalar",
     `- [Ana sayfa](${SITE_URL}/): koleksiyonlar, atölye yaklaşımı ve iletişim formu`,
+    `- [Blog](${SITE_URL}/blog): malzeme rehberleri, proje hikâyeleri ve atölyeden notlar`,
     `- [Çerez politikası ve aydınlatma metni](${SITE_URL}/cerez-politikasi)`,
     ...(journal.length
-      ? ["", "## Atölyeden notlar", ...journal.map((j) => `- ${j.category ? `${j.category}: ` : ""}${j.title}${j.href ? ` (${j.href})` : ""}`)]
+      ? [
+          "",
+          "## Blog yazıları",
+          ...journal.map(
+            (j) => `- [${j.title}](${SITE_URL}/blog/${j.slug})${j.category ? ` (${j.category})` : ""}${j.excerpt ? `: ${j.excerpt}` : ""}`
+          ),
+        ]
       : []),
   ].filter((l): l is string => typeof l === "string");
 

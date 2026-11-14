@@ -22,6 +22,12 @@ export function MediaField({
   dark?: boolean;
 }) {
   const [value, setValue] = useState(defaultValue);
+  // Kayıttan sonra sunucudan yeni değer gelirse alanı ona eşitle (eski seçim kalıp yeni veriyi ezmesin)
+  const [prevDefault, setPrevDefault] = useState(defaultValue);
+  if (prevDefault !== defaultValue) {
+    setPrevDefault(defaultValue);
+    setValue(defaultValue);
+  }
   const [open, setOpen] = useState(false);
 
   return (

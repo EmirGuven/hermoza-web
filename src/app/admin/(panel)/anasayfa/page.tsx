@@ -49,8 +49,18 @@ export default async function HomeSettingsPage() {
         </div>
       </Card>
 
+      <Card title="Koleksiyonlar bölümü" sub="Koleksiyonların kendisi “Koleksiyonlar” sayfasından yönetilir.">
+        <div className="grid-2">
+          <div className="stack">
+            <TextField label="Üst etiket" name="collections.eyebrow" defaultValue={h.collections.eyebrow} />
+            <TextField label="Başlık" name="collections.title" defaultValue={h.collections.title} />
+          </div>
+          <TextArea label="Açıklama" name="collections.text" defaultValue={h.collections.text} rows={4} />
+        </div>
+      </Card>
+
       <div className="grid-2">
-        <Card title="Journal bölümü">
+        <Card title="Blog bölümü" sub="Ana sayfadaki yazı kartları ve /blog sayfasının başlığı">
           <div className="stack">
             <TextField label="Üst etiket" name="journal.eyebrow" defaultValue={h.journal.eyebrow} />
             <TextField label="Başlık" name="journal.title" defaultValue={h.journal.title} />

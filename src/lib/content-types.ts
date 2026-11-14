@@ -48,6 +48,7 @@ export type HomeSettings = {
     buttonHref: string;
     video: VideoSet;
   };
+  collections: { eyebrow: string; title: string; text: string };
   journal: { eyebrow: string; title: string };
   contact: { eyebrow: string; title: string; text: string };
 };
@@ -63,15 +64,24 @@ export type Collection = {
   active: boolean;
 };
 
-export type JournalPost = {
+export type BlogPost = {
   id: number;
   sort: number;
+  slug: string;
   category: string;
   title: string;
+  excerpt: string;
+  content: string;
   image: string;
   href: string;
+  seoTitle: string;
+  seoDescription: string;
   active: boolean;
+  publishedAt: Date;
+  updatedAt: Date;
 };
+/** Eski ad */
+export type JournalPost = BlogPost;
 
 const m = (p: string) => `/media/${p}`;
 
@@ -86,7 +96,7 @@ export const defaultGeneral: GeneralSettings = {
   headerCtaHref: "#iletisim",
   menuLinks: [
     { label: "Koleksiyonlar", href: "#koleksiyonlar" },
-    { label: "Journal", href: "#journal" },
+    { label: "Blog", href: "/blog" },
     { label: "İletişim", href: "#iletisim" },
   ],
   footerLinks: [
@@ -133,6 +143,11 @@ export const defaultHome: HomeSettings = {
       poster: m("videos/bespoke-poster.jpg"),
     },
   },
+  collections: {
+    eyebrow: "HERMOZA İMZASI",
+    title: "Mekana Özgü Bir İmza..",
+    text: "Her tasarım, ait olduğu mekanın mimarisinden doğar. Malzeme seçiminden birleşim detaylarına kadar her karar, Hermoza atölyesinde özenle şekillenir.",
+  },
   journal: { eyebrow: "Journal", title: "Atölyeden notlar" },
   contact: {
     eyebrow: "İletişim",
@@ -171,31 +186,55 @@ export const defaultCollections: Omit<Collection, "id">[] = [
   },
 ];
 
-export const defaultJournal: Omit<JournalPost, "id">[] = [
-  {
-    sort: 1,
-    category: "Malzeme",
-    title: "Masif ceviz neden yıllar geçtikçe güzelleşir?",
-    image: m("images/journal-ceviz.jpg"),
-    href: "",
-    active: true,
-  },
-  {
-    sort: 2,
-    category: "Proje",
-    title: "Zekeriyaköy’de taş ve ahşabın buluştuğu bir mutfak",
-    image: m("images/journal-zekeriyakoy.jpg"),
-    href: "",
-    active: true,
-  },
-  {
-    sort: 3,
-    category: "Rehber",
-    title: "Ada mutfak planlarken dikkat edilmesi gereken 5 ölçü",
-    image: m("images/journal-ada-mutfak.jpg"),
-    href: "",
-    active: true,
-  },
+const post = (
+  slug: string,
+  category: string,
+  title: string,
+  excerpt: string,
+  image: string,
+  date: string
+): Omit<BlogPost, "id"> => ({
+  sort: 0,
+  slug,
+  category,
+  title,
+  excerpt,
+  content: "",
+  image,
+  href: "",
+  seoTitle: "",
+  seoDescription: "",
+  active: true,
+  publishedAt: new Date(date),
+  updatedAt: new Date(date),
+});
+
+/** Veritabanına ulaşılamazsa gösterilen yazılar */
+export const defaultJournal: Omit<BlogPost, "id">[] = [
+  post(
+    "masif-ceviz-neden-yillar-gectikce-guzellesir",
+    "Malzeme",
+    "Masif ceviz neden yıllar geçtikçe güzelleşir?",
+    "Cevizin rengi, dokusu ve yaşlandıkça kazandığı derinlik üzerine atölyeden notlar.",
+    m("images/journal-ceviz.jpg"),
+    "2026-11-09T12:00:00+03:00"
+  ),
+  post(
+    "zekeriyakoyde-tas-ve-ahsabin-bulustugu-bir-mutfak",
+    "Proje",
+    "Zekeriyaköy’de taş ve ahşabın buluştuğu bir mutfak",
+    "Doğal taş tezgâh ve masif kapaklarla, bahçeye açılan bir aile mutfağının hikâyesi.",
+    m("images/journal-zekeriyakoy.jpg"),
+    "2026-11-09T12:00:00+03:00"
+  ),
+  post(
+    "ada-mutfak-planlarken-dikkat-edilmesi-gereken-5-olcu",
+    "Rehber",
+    "Ada mutfak planlarken dikkat edilmesi gereken 5 ölçü",
+    "Geçiş boşluklarından tezgâh yüksekliğine, ada mutfağı rahat kullanmanın ölçüleri.",
+    m("images/journal-ada-mutfak.jpg"),
+    "2026-11-09T12:00:00+03:00"
+  ),
 ];
 
 export const SETTING_DEFAULTS = {

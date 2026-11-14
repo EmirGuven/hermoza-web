@@ -2,7 +2,7 @@
 
 import { randomBytes } from "node:crypto";
 import { unlink } from "node:fs/promises";
-import { and, asc, eq, gt, sql } from "drizzle-orm";
+import { and, asc, eq, gt, ne, sql } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -166,6 +166,11 @@ export async function saveHome(_: ActionState, f: FormData): Promise<ActionState
         poster: str(f, "bespoke.video.poster"),
       },
     },
+    collections: {
+      eyebrow: str(f, "collections.eyebrow"),
+      title: str(f, "collections.title"),
+      text: str(f, "collections.text"),
+    },
     journal: { eyebrow: str(f, "journal.eyebrow"), title: str(f, "journal.title") },
     contact: {
       eyebrow: str(f, "contact.eyebrow"),
@@ -226,51 +231,86 @@ export async function moveCollection(id: number, dir: -1 | 1) {
   updateTag(SITE_TAG);
 }
 
-/* ---------------- Journal ---------------- */
+/* ---------------- Blog ---------------- */
 
-export async function saveJournal(_: ActionState, f: FormData): Promise<ActionState> {
-  await requireAdmin();
-  const id = Number(f.get("id") || 0);
-  const data = {
-    category: str(f, "category"),
-    title: str(f, "title"),
-    image: str(f, "image"),
-    href: str(f, "href"),
-    active: bool(f, "active"),
-  };
-  if (!data.title) return fail("Başlık gerekli");
-  if (id) {
-    await db.update(journalPosts).set(data).where(eq(journalPosts.id, id));
-  } else {
-    const [{ max }] = await db.select({ max: sql<number>`coalesce(max(${journalPosts.sort}), 0)` }).from(journalPosts);
-    await db.insert(journalPosts).values({ ...data, sort: Number(max) + 1 });
-  }
-  updateTag(SITE_TAG);
-  redirect("/admin/journal?kaydedildi=1");
+/** Başlıktan URL dostu adres üretir (Türkçe karakterler sadeleştirilir) */
+function slugify(text: string) {
+  return text
+    .toLocaleLowerCase("tr-TR")
+    .replace(/ç/g, "c").replace(/ğ/g, "g").replace(/ı/g, "i")
+    .replace(/ö/g, "o").replace(/ş/g, "s").replace(/ü/g, "u")
+    .replace(/â/g, "a").replace(/î/g, "i").replace(/û/g, "u")
+    .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80)
+    .replace(/-+$/, "");
 }
 
-export async function deleteJournal(id: number) {
+/** Aynı adres başka yazıda varsa sonuna -2, -3 … ekler */
+async function uniqueSlug(base: string, id: number) {
+  for (let n = 1; ; n++) {
+    const slug = n === 1 ? base : `${base}-${n}`;
+    const hit = await db.query.journalPosts.findFirst({
+      columns: { id: true },
+      where: and(eq(journalPosts.slug, slug), id ? ne(journalPosts.id, id) : undefined),
+    });
+    if (!hit) return slug;
+  }
+}
+
+/** Paneldeki "yayın tarihi" alanı Türkiye saatiyle (UTC+3, yaz saati yok) girilir */
+function istanbulDate(v: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return null;
+  const d = new Date(`${v}:00+03:00`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+export async function savePost(_: ActionState, f: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const id = Number(f.get("id") || 0);
+  const title = str(f, "title");
+  if (!title) return fail("Başlık gerekli");
+  const base = slugify(str(f, "slug") || title);
+  if (!base) return fail("Adres (slug) için başlıkta harf ya da rakam olmalı");
+
+  const now = new Date();
+  const data = {
+    title,
+    slug: await uniqueSlug(base, id),
+    category: str(f, "category"),
+    excerpt: str(f, "excerpt"),
+    content: String(f.get("content") ?? "").replace(/\r\n?/g, "\n").trim(),
+    image: str(f, "image"),
+    seoTitle: str(f, "seoTitle"),
+    seoDescription: str(f, "seoDescription"),
+    active: bool(f, "active"),
+    publishedAt: istanbulDate(str(f, "publishedAt")) ?? now,
+    updatedAt: now,
+  };
+
+  if (id) {
+    await db.update(journalPosts).set(data).where(eq(journalPosts.id, id));
+    updateTag(SITE_TAG);
+    return done(data.slug !== base ? `Kaydedildi. Bu adres kullanıldığı için “${data.slug}” verildi.` : "Kaydedildi");
+  }
+  const [row] = await db.insert(journalPosts).values(data).returning({ id: journalPosts.id });
+  updateTag(SITE_TAG);
+  redirect(`/admin/blog/${row.id}?kaydedildi=1`);
+}
+
+export async function deletePost(id: number) {
   await requireAdmin();
   await db.delete(journalPosts).where(eq(journalPosts.id, id));
   updateTag(SITE_TAG);
 }
 
-export async function toggleJournal(id: number) {
+export async function togglePost(id: number) {
   await requireAdmin();
-  await db.update(journalPosts).set({ active: sql`not ${journalPosts.active}` }).where(eq(journalPosts.id, id));
-  updateTag(SITE_TAG);
-}
-
-export async function moveJournal(id: number, dir: -1 | 1) {
-  await requireAdmin();
-  await db.transaction(async (tx) => {
-    const rows = await tx.select({ id: journalPosts.id }).from(journalPosts).orderBy(asc(journalPosts.sort), asc(journalPosts.id));
-    const i = rows.findIndex((r) => r.id === id);
-    const j = i + dir;
-    if (i < 0 || j < 0 || j >= rows.length) return;
-    [rows[i], rows[j]] = [rows[j], rows[i]];
-    for (const [n, r] of rows.entries()) await tx.update(journalPosts).set({ sort: n + 1 }).where(eq(journalPosts.id, r.id));
-  });
+  await db
+    .update(journalPosts)
+    .set({ active: sql`not ${journalPosts.active}`, updatedAt: new Date() })
+    .where(eq(journalPosts.id, id));
   updateTag(SITE_TAG);
 }
 

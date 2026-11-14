@@ -25,7 +25,7 @@ export default async function MediaPage() {
     <div className="stack">
       <PageHead
         title="Medya Kütüphanesi"
-        description="Sitede kullanılan görseller ve videolar. Görsel en fazla 15 MB, video en fazla 60 MB."
+        description="Sitede kullanılan görseller ve videolar. Görsellerde boyut sınırı yok, büyük görseller otomatik küçültülür. Video en fazla 60 MB."
       />
       <MediaLibrary initial={files} />
     </div>

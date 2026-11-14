@@ -6,7 +6,9 @@ import {
   serial,
   text,
   timestamp,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 /** Tek satırlık ayar grupları: "general", "contact", "home" */
 export const settings = pgTable("settings", {
@@ -28,17 +30,32 @@ export const collections = pgTable("collections", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** Journal yazıları */
-export const journalPosts = pgTable("journal_posts", {
-  id: serial("id").primaryKey(),
-  sort: integer("sort").notNull().default(0),
-  category: text("category").notNull().default(""),
-  title: text("title").notNull(),
-  image: text("image").notNull().default(""),
-  href: text("href").notNull().default(""),
-  active: boolean("active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+/** Blog yazıları (tablo adı eski "Journal" bölümünden kalma) */
+export const journalPosts = pgTable(
+  "journal_posts",
+  {
+    id: serial("id").primaryKey(),
+    sort: integer("sort").notNull().default(0),
+    /** Adres: /blog/<slug>. Boş bırakılırsa başlıktan üretilir. */
+    slug: text("slug").notNull().default(""),
+    category: text("category").notNull().default(""),
+    title: text("title").notNull(),
+    /** Liste ve paylaşım kartlarında görünen kısa özet */
+    excerpt: text("excerpt").notNull().default(""),
+    /** Yazı gövdesi (Markdown) */
+    content: text("content").notNull().default(""),
+    image: text("image").notNull().default(""),
+    /** Eski kartlardan kalan isteğe bağlı dış bağlantı (artık kullanılmıyor) */
+    href: text("href").notNull().default(""),
+    seoTitle: text("seo_title").notNull().default(""),
+    seoDescription: text("seo_description").notNull().default(""),
+    active: boolean("active").notNull().default(true),
+    publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("journal_posts_slug_idx").on(t.slug).where(sql`${t.slug} <> ''`)]
+);
 
 /** Medya kütüphanesi (dosyalar UPLOAD_DIR altında, adres /media/...) */
 export const media = pgTable("media", {

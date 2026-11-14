@@ -15,6 +15,13 @@
       "when": 1794258602574,
       "tag": "0001_mail_randevu_abone",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794679418452,
+      "tag": "0002_blog",
+      "breakpoints": true
     }
   ]
 }

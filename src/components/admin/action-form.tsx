@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useLayoutEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Save } from "lucide-react";
 import type { ActionState } from "@/app/admin/actions";
@@ -20,6 +20,11 @@ export function ActionForm({
 }) {
   const [state, formAction] = useActionState(action, {});
   const toast = useToast();
+  // Next.js (cacheComponents) ayrılınan sayfayı kapatmaz, <Activity> ile gizleyip state'iyle saklar.
+  // Form geri açıldığında eski değerlerle kalıp kaydedilince yeni veriyi ezmesin diye, sayfa gizlenince
+  // alanlar yeniden kurulur ve sunucudan gelen güncel değerlerle başlar.
+  const [resetKey, setResetKey] = useState(0);
+  useLayoutEffect(() => () => setResetKey((k) => k + 1), []);
 
   useEffect(() => {
     if (!state.at) return;
@@ -30,7 +35,7 @@ export function ActionForm({
   }, [state.at]);
 
   return (
-    <form action={formAction} className={className}>
+    <form key={resetKey} action={formAction} className={className}>
       {children}
     </form>
   );

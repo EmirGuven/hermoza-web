@@ -21,7 +21,7 @@ export default async function Dashboard() {
 
   const stats = [
     { label: "Koleksiyon", value: c.n, icon: Sofa, href: "/admin/koleksiyonlar" },
-    { label: "Journal yazısı", value: j.n, icon: FileText, href: "/admin/journal" },
+    { label: "Blog yazısı", value: j.n, icon: FileText, href: "/admin/blog" },
     { label: "Medya dosyası", value: m.n, icon: Images, href: "/admin/medya" },
     { label: "Okunmamış mesaj", value: unread.n, icon: Inbox, href: "/admin/mesajlar" },
   ];

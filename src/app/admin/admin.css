@@ -372,3 +372,22 @@
 @keyframes adm-pop { from { transform: scale(0.98); opacity: 0; } }
 @keyframes adm-fade { from { opacity: 0; } }
 @keyframes adm-spin { to { transform: rotate(360deg); } }
+
+/* ---------------- Blog yazısı editörü (components/admin/markdown-editor.tsx) ---------------- */
+.adm .md-editor__box { border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.adm .md-editor__box:focus-within { border-color: var(--accent); }
+.adm .md-editor__bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 8px; border-bottom: 1px solid var(--border); background: var(--surface-2); flex-wrap: wrap; }
+.adm .md-editor__tools { display: flex; flex-wrap: wrap; gap: 2px; }
+.adm .md-editor__tools .btn:disabled { opacity: 0.35; }
+.adm .md-editor__tabs { display: inline-flex; padding: 3px; gap: 2px; border-radius: 8px; background: var(--border); }
+.adm .md-editor__tabs button { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; }
+.adm .md-editor__tabs button svg { width: 15px; height: 15px; }
+.adm .md-editor__tabs button.is-on { background: var(--surface); color: inherit; box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); }
+.adm .md-editor__input { display: block; width: 100%; min-height: 460px; padding: 18px 20px; border: 0; outline: none; resize: vertical; background: transparent; color: inherit; font-family: var(--font-geist-mono), ui-monospace, monospace; font-size: 14px; line-height: 1.75; }
+.adm .md-editor__input[hidden] { display: none; }
+/* Önizleme her temada sitedeki gibi açık zeminde, site fontuyla */
+.adm .md-editor__preview { min-height: 460px; max-height: 70vh; overflow: auto; padding: 40px clamp(20px, 6vw, 72px); background: #fbf8f4; color: #1a1a1a; font-family: var(--font-sans), sans-serif; }
+.adm .md-editor__preview .post-body { max-width: 680px; margin: 0 auto; }
+.adm .md-editor__preview .post-body figure { margin-inline: 0; }
+.adm .post-layout { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
+@media (max-width: 1100px) { .adm .post-layout { grid-template-columns: minmax(0, 1fr); } }

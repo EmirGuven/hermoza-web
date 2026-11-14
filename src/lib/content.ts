@@ -1,5 +1,5 @@
 import "server-only";
-import { asc, eq, max } from "drizzle-orm";
+import { and, asc, desc, eq, max } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 import { db } from "@/lib/db";
 import { collections, journalPosts, settings } from "@/db/schema";
@@ -8,7 +8,7 @@ import {
   defaultCollections,
   defaultJournal,
   type Collection,
-  type JournalPost,
+  type BlogPost,
   type SettingKey,
   type SettingValue,
 } from "@/lib/content-types";
@@ -76,7 +76,10 @@ export async function getCollections(): Promise<Collection[]> {
   }
 }
 
-export async function getJournal(): Promise<JournalPost[]> {
+const fallbackPosts = (): BlogPost[] => defaultJournal.map((j, i) => ({ ...j, id: -(i + 1) }));
+
+/** Yayındaki blog yazıları, en yeni önce */
+export async function getPosts(): Promise<BlogPost[]> {
   "use cache";
   cacheTag(SITE_TAG);
   try {
@@ -84,9 +87,27 @@ export async function getJournal(): Promise<JournalPost[]> {
       .select()
       .from(journalPosts)
       .where(eq(journalPosts.active, true))
-      .orderBy(asc(journalPosts.sort), asc(journalPosts.id));
+      .orderBy(desc(journalPosts.publishedAt), desc(journalPosts.id));
   } catch (e) {
-    console.error("[content] journal okunamadı:", (e as Error).message);
-    return defaultJournal.map((j, i) => ({ ...j, id: -(i + 1) }));
+    console.error("[content] blog yazıları okunamadı:", (e as Error).message);
+    return fallbackPosts();
   }
 }
+
+/** Tek yazı (yalnızca yayındakiler) */
+export async function getPost(slug: string): Promise<BlogPost | null> {
+  "use cache";
+  cacheTag(SITE_TAG);
+  try {
+    const row = await db.query.journalPosts.findFirst({
+      where: and(eq(journalPosts.slug, slug), eq(journalPosts.active, true)),
+    });
+    return row ?? null;
+  } catch (e) {
+    console.error("[content] blog yazısı okunamadı:", (e as Error).message);
+    return fallbackPosts().find((p) => p.slug === slug) ?? null;
+  }
+}
+
+/** Eski ad: ana sayfa ve llms.txt */
+export const getJournal = getPosts;

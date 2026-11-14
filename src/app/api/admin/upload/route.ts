@@ -3,9 +3,9 @@ import path from "node:path";
 import { db } from "@/lib/db";
 import { media } from "@/db/schema";
 import { getAdmin } from "@/lib/session";
+import { compressImage } from "@/lib/image-compress";
 import { kindOf, mediaUrl, mimeOf, resolveUpload, slugifyFileName } from "@/lib/media";
 
-const MAX_IMAGE = 15 * 1024 * 1024; // 15 MB
 const MAX_VIDEO = 60 * 1024 * 1024; // 60 MB (videolar önce sıkıştırılmalı)
 
 // Panelden dosya yükleme. Oturum kontrolü burada yapılır (proxy sadece sayfaları korur).
@@ -23,10 +23,10 @@ export async function POST(req: Request) {
     if (kind === "other") {
       return Response.json({ error: `${file.name}: desteklenmeyen dosya türü` }, { status: 400 });
     }
-    const limit = kind === "video" ? MAX_VIDEO : MAX_IMAGE;
-    if (file.size > limit) {
+    // Görsellerde boyut sınırı yok (kaydederken otomatik küçültülür); yalnızca videolar sınırlı
+    if (kind === "video" && file.size > MAX_VIDEO) {
       return Response.json(
-        { error: `${file.name}: en fazla ${Math.round(limit / 1024 / 1024)} MB olabilir` },
+        { error: `${file.name}: en fazla ${Math.round(MAX_VIDEO / 1024 / 1024)} MB olabilir` },
         { status: 413 }
       );
     }
@@ -48,11 +48,14 @@ export async function POST(req: Request) {
     if (!full) return Response.json({ error: "Geçersiz dosya adı" }, { status: 400 });
 
     await mkdir(path.dirname(full), { recursive: true });
-    await writeFile(full, Buffer.from(await file.arrayBuffer()));
+    const original = Buffer.from(await file.arrayBuffer());
+    // Görseller otomatik küçültülür; videolar olduğu gibi kaydedilir
+    const data = kind === "image" ? await compressImage(original, ext) : original;
+    await writeFile(full, data);
 
     const [row] = await db
       .insert(media)
-      .values({ path: rel, kind, mime: mimeOf(rel), size: file.size, originalName: file.name })
+      .values({ path: rel, kind, mime: mimeOf(rel), size: data.length, originalName: file.name })
       .returning();
     saved.push({ ...row, url: mediaUrl(rel) });
   }

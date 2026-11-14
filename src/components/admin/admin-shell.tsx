@@ -36,7 +36,7 @@ function useNav(unread: number): NavGroup[] {
       items: [
         { href: "/admin/anasayfa", title: "Ana Sayfa", icon: Home },
         { href: "/admin/koleksiyonlar", title: "Koleksiyonlar", icon: Sofa },
-        { href: "/admin/journal", title: "Journal", icon: FileText },
+        { href: "/admin/blog", title: "Blog", icon: FileText },
         { href: "/admin/medya", title: "Medya Kütüphanesi", icon: Images },
       ],
     },
@@ -64,7 +64,7 @@ function useNav(unread: number): NavGroup[] {
 const TITLES: [string, string, string][] = [
   ["/admin/anasayfa", "İçerik", "Ana Sayfa"],
   ["/admin/koleksiyonlar", "İçerik", "Koleksiyonlar"],
-  ["/admin/journal", "İçerik", "Journal"],
+  ["/admin/blog", "İçerik", "Blog"],
   ["/admin/medya", "İçerik", "Medya Kütüphanesi"],
   ["/admin/genel", "Site", "Header & Footer"],
   ["/admin/iletisim", "Site", "İletişim Bilgileri"],

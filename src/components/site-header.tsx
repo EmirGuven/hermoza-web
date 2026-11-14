@@ -12,11 +12,15 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 export function SiteHeader({
   general,
   contact,
+  home = true,
 }: {
   general: GeneralSettings;
   contact: ContactSettings;
+  /** Ana sayfa dışında (blog vb.) false: "#bolum" bağlantıları ana sayfadaki bölüme gider */
+  home?: boolean;
 }) {
   const links = general.menuLinks;
+  const fix = (href: string) => (!home && href.startsWith("#") ? `/${href}` : href);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -54,7 +58,7 @@ export function SiteHeader({
           </span>
           <span className="hidden sm:inline">Menü</span>
         </button>
-        <a href="#" aria-label="Hermoza ana sayfa">
+        <a href={home ? "#" : "/"} aria-label="Hermoza ana sayfa">
           <Image
             src={general.logo}
             alt={general.siteName}
@@ -65,7 +69,7 @@ export function SiteHeader({
           />
         </a>
         <a
-          href={general.headerCtaHref}
+          href={fix(general.headerCtaHref)}
           className="justify-self-end text-[11px] uppercase tracking-[0.3em] text-white/70 transition-colors hover:text-white"
         >
           {general.headerCtaLabel}
@@ -106,7 +110,7 @@ export function SiteHeader({
                       transition={{ delay: 0.3 + i * 0.07, duration: 0.8, ease: EASE }}
                     >
                       <a
-                        href={l.href}
+                        href={fix(l.href)}
                         onClick={() => setOpen(false)}
                         className="group flex items-baseline gap-6 text-4xl font-extralight uppercase tracking-[0.12em] transition-colors hover:text-clay md:text-6xl"
                       >
