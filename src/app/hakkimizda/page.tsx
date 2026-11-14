@@ -81,7 +81,7 @@ export default async function AboutPage() {
         {/* Manifesto */}
         <section className="bg-mist">
           <Reveal className="mx-auto max-w-2xl px-6 py-28 text-center md:py-40">
-            <Eyebrow className="mb-10 text-clay">{general.siteName}</Eyebrow>
+            <Eyebrow className="mb-10 text-bronze">{general.siteName}</Eyebrow>
             <p className="text-xl font-extralight leading-[1.7] text-forest md:text-2xl md:leading-[1.7]">{BRAND_STORY[0]}</p>
             <span aria-hidden className="mx-auto my-14 block h-16 w-px bg-forest/20" />
             <div className="space-y-6 font-light leading-relaxed text-ink/60">
@@ -121,7 +121,7 @@ export default async function AboutPage() {
               </div>
             </Reveal>
             <Reveal delay={0.1} className="px-2 md:px-0">
-              <Eyebrow className="mb-10 text-clay">Atölye</Eyebrow>
+              <Eyebrow className="mb-10 text-bronze">Atölye</Eyebrow>
               <h2 className="mb-8 text-2xl font-extralight uppercase leading-snug tracking-[0.24em] text-forest md:text-3xl">
                 Her parça elden geçer
               </h2>
@@ -141,13 +141,13 @@ export default async function AboutPage() {
         <section className="border-t border-forest/10 bg-white">
           <div className="mx-auto max-w-6xl px-6 py-28 md:px-12 md:py-36">
             <Reveal>
-              <Eyebrow className="mb-16 text-center text-clay">Süreç</Eyebrow>
+              <Eyebrow className="mb-16 text-center text-bronze">Süreç</Eyebrow>
             </Reveal>
             <ol className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
               {BRAND_PROCESS.map((p, i) => (
                 <Reveal key={p.title} delay={i * 0.08}>
                   <li className="border-t border-forest/15 pt-8">
-                    <span className="mb-5 block text-[10px] tracking-[0.3em] text-clay">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="mb-5 block text-[10px] tracking-[0.3em] text-bronze">{String(i + 1).padStart(2, "0")}</span>
                     <span className="mb-4 block font-light uppercase tracking-[0.2em] text-forest">{p.title}</span>
                     <span className="block text-[15px] font-light leading-relaxed text-ink/60">{p.text}</span>
                   </li>
@@ -185,7 +185,7 @@ export default async function AboutPage() {
         <section className="bg-mist">
           <div className="mx-auto max-w-3xl px-6 py-28 md:py-36">
             <Reveal>
-              <Eyebrow className="mb-14 text-center text-clay">Sık sorulan sorular</Eyebrow>
+              <Eyebrow className="mb-14 text-center text-bronze">Sık sorulan sorular</Eyebrow>
             </Reveal>
             <div className="border-t border-forest/12">
               {faq.map((f) => (
@@ -207,7 +207,7 @@ export default async function AboutPage() {
         {/* Davet */}
         <section className="border-t border-forest/10 bg-white">
           <Reveal className="mx-auto max-w-xl px-6 py-28 text-center md:py-36">
-            <Eyebrow className="mb-8 text-clay">Tanışalım</Eyebrow>
+            <Eyebrow className="mb-8 text-bronze">Tanışalım</Eyebrow>
             <h2 className="mb-12 text-2xl font-extralight uppercase tracking-[0.28em] text-forest md:text-3xl">
               Projenizi konuşalım
             </h2>

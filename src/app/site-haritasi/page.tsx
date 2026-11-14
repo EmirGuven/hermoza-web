@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return <p className="mb-8 text-[10px] uppercase tracking-[0.55em] text-clay">{children}</p>;
+  return <p className="mb-8 text-[10px] uppercase tracking-[0.55em] text-bronze">{children}</p>;
 }
 
 function Group({ title, items }: { title: string; items: { href: string; label: string; note?: string }[] }) {
@@ -26,9 +26,9 @@ function Group({ title, items }: { title: string; items: { href: string; label: 
         {items.map((it, i) => (
           <li key={it.href} className="border-b border-forest/12">
             <Link href={it.href} className="group flex items-baseline gap-6 py-5">
-              <span className="w-6 shrink-0 text-[10px] tracking-[0.3em] text-clay">{String(i + 1).padStart(2, "0")}</span>
+              <span className="w-6 shrink-0 text-[10px] tracking-[0.3em] text-bronze">{String(i + 1).padStart(2, "0")}</span>
               <span className="font-light tracking-[0.04em] text-forest transition-colors group-hover:text-rust">{it.label}</span>
-              {it.note && <span className="ml-auto hidden text-[10px] uppercase tracking-[0.3em] text-ink/35 sm:block">{it.note}</span>}
+              {it.note && <span className="ml-auto hidden text-[10px] uppercase tracking-[0.3em] text-ink/60 sm:block">{it.note}</span>}
             </Link>
           </li>
         ))}

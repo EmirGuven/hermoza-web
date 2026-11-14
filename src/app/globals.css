@@ -15,6 +15,8 @@
   --color-forest-deep: #0d2622;
   --color-rust: #b34a25;
   --color-clay: #c9957d;
+  /* Beyaz zeminde okunur bakır (kontrast ≥ 4.5:1); clay yalnızca koyu zeminlerde */
+  --color-bronze: #9a6247;
   /* Sitenin ana zemini (eski krem yerine): beyaz */
   --color-mist: #ffffff;
   --color-ink: #1a1a1a;

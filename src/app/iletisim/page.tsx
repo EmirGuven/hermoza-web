@@ -60,7 +60,7 @@ function Line({
 }) {
   return (
     <div className="border-b border-forest/12 py-6">
-      <p className="mb-2 text-[10px] uppercase tracking-[0.4em] text-ink/40">
+      <p className="mb-2 text-[10px] uppercase tracking-[0.4em] text-ink/60">
         {label}
       </p>
       <div className="font-light text-forest">{children}</div>
@@ -128,7 +128,7 @@ export default async function ContactPage() {
         <section className="bg-mist">
           <div className="mx-auto grid max-w-6xl gap-20 px-6 py-24 md:grid-cols-[5fr_6fr] md:gap-24 md:px-12 md:py-36">
             <Reveal>
-              <Eyebrow className="mb-10 text-clay">Bilgiler</Eyebrow>
+              <Eyebrow className="mb-10 text-bronze">Bilgiler</Eyebrow>
               <div className="border-t border-forest/12">
                 {contact.address && (
                   <Line label="Showroom">
@@ -138,7 +138,7 @@ export default async function ContactPage() {
                         href={contact.mapsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`mt-3 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-clay ${link}`}
+                        className={`mt-3 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-bronze ${link}`}
                       >
                         Yol tarifi{" "}
                         <ArrowUpRight className="size-3.5" strokeWidth={1.25} />
@@ -180,7 +180,7 @@ export default async function ContactPage() {
               </div>
             </Reveal>
             <Reveal delay={0.1}>
-              <Eyebrow className="mb-10 text-clay">Randevu talebi</Eyebrow>
+              <Eyebrow className="mb-10 text-bronze">Randevu talebi</Eyebrow>
               <ContactForm />
             </Reveal>
           </div>

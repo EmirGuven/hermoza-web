@@ -47,7 +47,7 @@ export function NewsletterForm({
           <ArrowRight className="size-4" />
         </button>
       </div>
-      <label className="mt-3 flex cursor-pointer items-start gap-2 text-[11px] font-light leading-relaxed text-white/50">
+      <label className="mt-3 flex cursor-pointer items-start gap-2 text-[11px] font-light leading-relaxed text-white/60">
         <input type="checkbox" name="consent" required className="mt-0.5 accent-[#b34a25]" />
         <span>
           Kampanya ve yeniliklerden e-posta ile haberdar olmak istiyorum.{" "}

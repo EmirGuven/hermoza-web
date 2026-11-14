@@ -223,10 +223,10 @@ export default async function Home() {
                         )}
                       </div>
                       {j.category && (
-                        <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-clay">{j.category}</p>
+                        <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-bronze">{j.category}</p>
                       )}
                       <h3 className="mb-3 text-lg font-light leading-snug text-forest">{j.title}</h3>
-                      <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-ink/50 transition-colors group-hover:text-rust">
+                      <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-ink/60 transition-colors group-hover:text-rust">
                         Oku <ArrowRight className="size-3.5" />
                       </span>
                     </article>

@@ -65,6 +65,7 @@ export function SiteHeader({
           onClick={() => setOpen(true)}
           aria-expanded={open}
           aria-controls="site-menu"
+          aria-label="Menüyü aç"
           className="group flex w-fit items-center gap-4 text-[11px] uppercase tracking-[0.3em] opacity-75 transition-opacity hover:opacity-100"
         >
           <span className="flex w-7 flex-col gap-[5px]">
@@ -157,7 +158,7 @@ export function SiteHeader({
                   ))}
                 </ul>
               </nav>
-              <div className="flex flex-wrap gap-x-10 gap-y-2 text-xs font-light tracking-wide text-white/50">
+              <div className="flex flex-wrap gap-x-10 gap-y-2 text-xs font-light tracking-wide text-white/60">
                 {contact.email && (
                   <a href={`mailto:${contact.email}`} className="hover:text-white">{contact.email}</a>
                 )}

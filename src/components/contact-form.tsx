@@ -39,7 +39,7 @@ export function ContactForm() {
         { name: "phone", label: "Telefon", type: "tel", auto: "tel" },
       ].map((f) => (
         <label key={f.name} className="block">
-          <span className="mb-2 block text-[10px] uppercase tracking-[0.35em] text-ink/45">{f.label}</span>
+          <span className="mb-2 block text-[10px] uppercase tracking-[0.35em] text-ink/60">{f.label}</span>
           <input
             name={f.name}
             type={f.type}
@@ -50,7 +50,7 @@ export function ContactForm() {
         </label>
       ))}
       <label className="block">
-        <span className="mb-2 block text-[10px] uppercase tracking-[0.35em] text-ink/45">Projeniz</span>
+        <span className="mb-2 block text-[10px] uppercase tracking-[0.35em] text-ink/60">Projeniz</span>
         <textarea
           name="message"
           rows={3}

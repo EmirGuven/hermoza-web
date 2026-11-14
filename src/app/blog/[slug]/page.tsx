@@ -156,7 +156,7 @@ async function PostContent({ params, siteName }: { params: Props["params"]; site
               <Markdown source={post.content} />
             </div>
           ) : (
-            !post.excerpt && <p className="font-light text-ink/50">Bu yazının içeriği yakında eklenecek.</p>
+            !post.excerpt && <p className="font-light text-ink/60">Bu yazının içeriği yakında eklenecek.</p>
           )}
 
           <div className="mt-16 flex flex-wrap items-center justify-between gap-6 border-t border-forest/10 pt-8">

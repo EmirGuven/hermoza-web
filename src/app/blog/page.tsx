@@ -81,7 +81,7 @@ export default async function BlogIndex() {
 
         <div className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
           {!featured ? (
-            <p className="py-20 text-center font-light text-ink/50">Henüz yayınlanmış yazı yok.</p>
+            <p className="py-20 text-center font-light text-ink/60">Henüz yayınlanmış yazı yok.</p>
           ) : (
             <>
               <Reveal>

@@ -142,7 +142,7 @@ async function CollectionContent({ params, siteName }: { params: Props["params"]
       {/* Giriş: ortalanmış dar sütun */}
       <section className="bg-mist">
         <Reveal className="mx-auto max-w-2xl px-6 py-28 text-center md:py-40">
-          <Eyebrow className="mb-10 text-clay">{c.title}</Eyebrow>
+          <Eyebrow className="mb-10 text-bronze">{c.title}</Eyebrow>
           <p className="text-xl font-extralight leading-[1.7] text-forest md:text-2xl md:leading-[1.7]">{c.body}</p>
           <Rule className="mt-14 bg-forest/20" />
         </Reveal>
@@ -198,11 +198,11 @@ async function CollectionContent({ params, siteName }: { params: Props["params"]
       {/* Davet: tek, zarif bağlantı */}
       <section className="border-t border-forest/10 bg-mist">
         <Reveal className="mx-auto max-w-xl px-6 py-28 text-center md:py-36">
-          <Eyebrow className="mb-8 text-clay">Özel tasarım</Eyebrow>
+          <Eyebrow className="mb-8 text-bronze">Özel tasarım</Eyebrow>
           <h2 className="mb-6 text-2xl font-extralight uppercase tracking-[0.28em] text-forest md:text-3xl">
             Sizin için tasarlayalım
           </h2>
-          <p className="mx-auto mb-12 font-light leading-relaxed text-ink/55">
+          <p className="mx-auto mb-12 font-light leading-relaxed text-ink/60">
             Her {c.title.toLocaleLowerCase("tr-TR")} projesi, mekanın kendisiyle başlar. Showroom’da ya da yerinde, size
             özel bir görüşme için randevu oluşturun.
           </p>

@@ -49,7 +49,7 @@ export function SiteFooter({
           </div>
         )}
       </div>
-      <div className="mx-auto mt-16 flex max-w-7xl flex-col justify-between gap-2 border-t border-white/10 pt-6 text-xs font-light text-white/40 md:flex-row">
+      <div className="mx-auto mt-16 flex max-w-7xl flex-col justify-between gap-2 border-t border-white/10 pt-6 text-xs font-light text-white/60 md:flex-row">
         <span>{general.footerCopyright}</span>
         <span className="flex flex-wrap gap-x-6 gap-y-1">
           {contact.phone && <a href={tel} className="hover:text-white">{contact.phone}</a>}

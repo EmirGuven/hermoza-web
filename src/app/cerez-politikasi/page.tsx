@@ -52,7 +52,7 @@ export default async function CookiePolicy() {
         <br />
         {contact.phone}
       </p>
-      <p className="mt-10 text-xs text-ink/45">
+      <p className="mt-10 text-xs text-ink/60">
         Not: Bu metin genel bir şablondur; yayına almadan önce hukuk danışmanınızla kontrol etmeniz önerilir.
       </p>
     </main>

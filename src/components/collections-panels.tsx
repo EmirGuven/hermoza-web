@@ -110,7 +110,7 @@ export function CollectionsPanels({
               <span className="mb-5 flex items-center gap-4 text-[11px] tracking-[0.3em] text-clay">
                 {num}
                 <span className="h-px w-10 bg-clay/60" />
-                <span className="text-white/45">{total}</span>
+                <span className="text-white/60">{total}</span>
               </span>
               <span className="mb-4 block text-3xl font-extralight uppercase tracking-[0.15em] md:text-5xl">
                 {c.title}

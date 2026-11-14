@@ -14,8 +14,8 @@ export const postExcerpt = (p: Pick<BlogPost, "excerpt" | "content">, max = 180)
 
 export function PostMeta({ post, light }: { post: BlogPost; light?: boolean }) {
   return (
-    <p className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] uppercase tracking-[0.35em] ${light ? "text-white/60" : "text-ink/45"}`}>
-      {post.category && <span className="text-clay">{post.category}</span>}
+    <p className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] uppercase tracking-[0.35em] ${light ? "text-white/60" : "text-ink/60"}`}>
+      {post.category && <span className={light ? "text-clay" : "text-bronze"}>{post.category}</span>}
       {post.category && <span aria-hidden>·</span>}
       <time dateTime={new Date(post.publishedAt).toISOString()}>{postDate(post.publishedAt)}</time>
       {post.content && (
@@ -50,7 +50,7 @@ export function PostCard({ post, sizes = "(min-width: 768px) 30vw, 100vw" }: { p
           {post.title}
         </h3>
         {excerpt && <p className="mb-5 font-light leading-relaxed text-ink/60">{excerpt}</p>}
-        <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-ink/50 transition-colors group-hover:text-rust">
+        <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-ink/60 transition-colors group-hover:text-rust">
           Oku <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
         </span>
       </article>
