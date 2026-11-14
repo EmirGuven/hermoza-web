@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import { pickVideoSrc, playMuted } from "@/lib/video-src";
+import { loadVideo } from "@/lib/video-src";
 import type { VideoSet } from "@/lib/content-types";
 
 /** Sadece döngüdeki video. Videolar panelden (Ana Sayfa) seçilir. */
@@ -18,12 +18,7 @@ export function Hero({ video, title }: { video: VideoSet; title: string }) {
   useEffect(() => {
     const v = ref.current;
     if (!v || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const start = () => {
-      const src = pickVideoSrc(video);
-      if (!src) return;
-      if (v.getAttribute("src") !== src) v.src = src;
-      playMuted(v);
-    };
+    const start = () => loadVideo(v, video);
     if (document.readyState === "complete") start();
     else window.addEventListener("load", start, { once: true });
     return () => window.removeEventListener("load", start);

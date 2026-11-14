@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { VideoSet } from "@/lib/content-types";
 import { optimizedImage } from "@/lib/image-url";
-import { pickVideoSrc, playMuted } from "@/lib/video-src";
+import { loadVideo } from "@/lib/video-src";
 
 /**
  * Arka plan videosu: ekrana yaklaşınca yüklenip oynar, ekrandan çıkınca durur.
@@ -20,10 +20,8 @@ export function BackgroundVideo({ video, className = "" }: { video: VideoSet; cl
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // Ekrana yaklaşınca ekrana uygun dosya yüklenir (mobilde mobil sürüm)
-          const src = pickVideoSrc(video);
-          if (src && v.getAttribute("src") !== src) v.src = src;
-          playMuted(v);
+          // Ekrana yaklaşınca ekrana uygun dosya yüklenir (mobilde mobil sürüm, destekliyorsa AV1)
+          loadVideo(v, video);
         } else {
           v.pause();
         }
