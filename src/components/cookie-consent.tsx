@@ -80,15 +80,17 @@ function Toggle({
 }
 
 export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean }) {
-  // Sunucuda "?" döner: pencere ilk HTML'de çizilmez, tarayıcıda karar verilir
-  const consent = useSyncExternalStore(consentStore.subscribe, consentStore.get, () => "?");
+  // Pencere sunucu HTML'inde hemen çizilir (sayfanın ilk boyamasında görünür, LCP'yi geciktirmez).
+  // Onay vermiş ziyaretçide <head>'deki betik html'e data-consent koyar ve CSS pencereyi boyamadan gizler;
+  // tarayıcıda çerez okununca pencere tamamen kaldırılır.
+  const consent = useSyncExternalStore(consentStore.subscribe, consentStore.get, () => "");
   // Ölçüm ve pazarlama varsayılan açık gelir; ziyaretçi kapatıp "Seçimimi kaydet" diyebilir
   const [olcum, setOlcum] = useState(true);
   const [pazarlama, setPazarlama] = useState(true);
   const [popup, setPopup] = useState(false);
 
   useEffect(() => {
-    if (!newsletterPopup || !consent || consent === "?" || readCookie(NL_SEEN)) return;
+    if (!newsletterPopup || !consent || readCookie(NL_SEEN)) return;
     // Sayfada 25 sn geçirince ya da sayfanın yarısına inince bir kez göster
     let shown = false;
     const show = () => {
@@ -114,7 +116,8 @@ export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean })
 
   return (
     <>
-      <AnimatePresence>
+      {/* initial={false}: ilk çizimde giriş animasyonu yok, pencere sunucu HTML'iyle birlikte görünür */}
+      <AnimatePresence initial={false}>
         {consent === "" && (
           <motion.div
             initial={{ y: 40, opacity: 0 }}
@@ -124,7 +127,7 @@ export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean })
             role="dialog"
             aria-modal="false"
             aria-labelledby="cookie-title"
-            className="fixed inset-x-3 bottom-3 z-[70] max-h-[70svh] overflow-y-auto md:bottom-5 md:left-5 md:right-auto md:w-[min(720px,calc(100vw-40px))] bg-[#262626]/95 px-4 py-3.5 font-sans text-white shadow-2xl backdrop-blur-md md:px-5 md:py-4"
+            className="cookie-banner fixed inset-x-3 bottom-3 z-[70] max-h-[70svh] overflow-y-auto md:bottom-5 md:left-5 md:right-auto md:w-[min(720px,calc(100vw-40px))] bg-[#262626]/95 px-4 py-3.5 font-sans text-white shadow-2xl backdrop-blur-md md:px-5 md:py-4"
           >
             <h2 id="cookie-title" className="mb-1.5 text-[13px] font-semibold tracking-wide">
               Çerez Tercihleriniz

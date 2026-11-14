@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { preload } from "react-dom";
-import { optimizedImage } from "@/lib/image-url";
+import Image from "next/image";
 import { pickVideoSrc, playMuted } from "@/lib/video-src";
 import type { VideoSet } from "@/lib/content-types";
 
 /** Sadece döngüdeki video. Videolar panelden (Ana Sayfa) seçilir. */
 export function Hero({ video, title }: { video: VideoSet; title: string }) {
   const ref = useRef<HTMLVideoElement>(null);
-  // Poster sayfanın en büyük öğesi (LCP): küçültülmüş WebP olarak ve en yüksek öncelikle yüklenir
-  const poster = video.poster ? optimizedImage(video.poster, 1280, 65) : undefined;
-  if (poster) preload(poster, { as: "image", fetchPriority: "high" });
+  // Poster sayfanın en büyük öğesi (LCP): videonun arkasında gerçek bir görsel olarak, ekrana uygun boyutta
+  // (telefonda küçük, masaüstünde büyük) ve en yüksek öncelikle yüklenir. Görsel değilse (ör. yanlışlıkla
+  // video adresi girildiyse) kullanılmaz.
+  const poster = /\.(jpe?g|png|webp|avif)$/i.test(video.poster) ? video.poster : "";
 
   // Video, sayfa tamamen yüklendikten sonra başlar (önce poster görünür, ilk açılış hızlı olur).
   // Kaynak ekrana göre seçilir: mobil yalnızca mobil dosyayı indirir. "Hareketi azalt" açıksa yalnızca poster.
@@ -33,13 +33,15 @@ export function Hero({ video, title }: { video: VideoSet; title: string }) {
     <section className="relative h-svh min-h-[560px] w-full overflow-hidden bg-forest-deep">
       {/* Sayfanın ana başlığı: görselde video var, arama motorları ve ekran okuyucular için metin */}
       <h1 className="sr-only">{title}</h1>
+      {poster && (
+        <Image src={poster} alt="" fill priority fetchPriority="high" sizes="100vw" quality={65} className="object-cover" />
+      )}
       {video.desktop && (
         <video
           // Video değişince öğe yeniden oluşsun
           key={video.desktop + video.mobile}
           ref={ref}
           className="absolute inset-0 h-full w-full object-cover"
-          poster={poster}
           muted
           loop
           playsInline

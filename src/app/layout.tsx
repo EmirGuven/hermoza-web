@@ -43,8 +43,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="tr"
+      // <head>'deki çerez betiği html'e data-consent ekleyebilir (hidrasyon uyarısı verilmesin)
+      suppressHydrationWarning
       className={`${montserrat.variable} ${geistMono.variable} ${outfit.variable} h-full scroll-smooth antialiased`}
     >
+      <head>
+        {/* Çerez tercihi önceden verildiyse pencere ilk boyamadan önce gizlenir (yanıp sönme olmaz) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(document.cookie.indexOf("hermoza_consent=")>-1)document.documentElement.setAttribute("data-consent","1")}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-full bg-mist font-sans text-ink">{children}</body>
     </html>
   );

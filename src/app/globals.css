@@ -581,3 +581,8 @@
 .post-body--dark hr {
   border-top-color: rgb(255 255 255 / 0.12);
 }
+
+/* Çerez tercihi önceden verilmişse (layout'taki betik) pencere hiç görünmez */
+html[data-consent] .cookie-banner {
+  display: none !important;
+}
