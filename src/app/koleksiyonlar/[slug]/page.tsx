@@ -64,6 +64,9 @@ export default async function CollectionPage({ params }: Props) {
   );
 }
 
+/** Galerinin ilk bölümünde gösterilen görsel sayısı (tam genişlik + büyük ve iki küçük) */
+const GALLERY_SPLIT = 4;
+
 function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <p className={`text-[10px] font-normal uppercase tracking-[0.55em] ${className}`}>{children}</p>;
 }
@@ -111,13 +114,13 @@ async function CollectionContent({ params, siteName }: { params: Props["params"]
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
 
       {/* Kapak: tam ekran görsel, ortalanmış sade başlık */}
-      <header className="relative flex h-svh min-h-[620px] items-center justify-center overflow-hidden bg-forest-deep text-center text-white">
+      <header className="relative flex h-svh min-h-[620px] items-end overflow-hidden bg-forest-deep text-white">
         {c.image && (
           <Image src={c.image} alt={`${siteName} ${c.title}`} fill priority sizes="100vw" className="kx-hero-img object-cover" />
         )}
-        <div className="absolute inset-0 bg-black/35" />
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/45 to-transparent" />
-        <div className="relative px-6">
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="relative mx-auto w-full max-w-[1680px] px-6 pb-16 md:px-12 md:pb-24">
           <Eyebrow className="kx-rise mb-8 text-white/70">
             Koleksiyon {String(index + 1).padStart(2, "0")}
           </Eyebrow>
@@ -125,59 +128,69 @@ async function CollectionContent({ params, siteName }: { params: Props["params"]
             {c.title}
           </h1>
           {c.subtitle && (
-            <p className="kx-rise mx-auto mt-8 max-w-md text-sm font-light tracking-[0.08em] text-white/75 [animation-delay:300ms] md:text-base">
+            <p className="kx-rise mt-6 max-w-md text-sm font-light tracking-[0.08em] text-white/75 [animation-delay:300ms] md:text-base">
               {c.subtitle}
             </p>
           )}
         </div>
-        <span className="absolute bottom-10 left-1/2 -translate-x-1/2" aria-hidden>
+        <span className="absolute bottom-16 right-6 hidden md:right-12 md:block md:bottom-24" aria-hidden>
           <span className="kx-scroll-line block h-14 w-px bg-white/50" />
         </span>
       </header>
 
       {/* Giriş: ortalanmış dar sütun */}
       <section className="bg-mist">
-        <div className="mx-auto max-w-2xl px-6 py-28 text-center md:py-40">
-          <Reveal>
-            <Eyebrow className="mb-10 text-clay">{c.title}</Eyebrow>
-            <p className="text-xl font-extralight leading-[1.7] text-forest md:text-2xl md:leading-[1.7]">{c.body}</p>
-          </Reveal>
-          {c.content && (
-            <Reveal delay={0.1}>
-              <Rule className="my-14 bg-forest/20" />
-              <div className="post-body text-left">
-                <Markdown source={c.content} />
-              </div>
-            </Reveal>
-          )}
-        </div>
+        <Reveal className="mx-auto max-w-2xl px-6 py-28 text-center md:py-40">
+          <Eyebrow className="mb-10 text-clay">{c.title}</Eyebrow>
+          <p className="text-xl font-extralight leading-[1.7] text-forest md:text-2xl md:leading-[1.7]">{c.body}</p>
+          <Rule className="mt-14 bg-forest/20" />
+        </Reveal>
       </section>
 
-      {/* Galeri */}
+      {/* Galeri: ilk bölüm */}
       {c.gallery.length > 0 && (
         <section aria-label={`${c.title} galerisi`} className="bg-mist px-4 pb-32 md:px-12 md:pb-44">
-          <CollectionGallery images={c.gallery} title={c.title} />
+          <CollectionGallery images={c.gallery} title={c.title} to={GALLERY_SPLIT} />
         </section>
       )}
 
-      {/* Detaylar: ince çizgili sade liste */}
-      {c.highlights.length > 0 && (
-        <section className="border-t border-forest/10 bg-white">
-          <div className="mx-auto max-w-4xl px-6 py-24 md:py-32">
-            <Reveal>
-              <Eyebrow className="mb-14 text-center text-clay">Detaylar</Eyebrow>
-            </Reveal>
-            <ul className="grid border-t border-forest/10 md:grid-cols-2 md:gap-x-16">
-              {c.highlights.map((h, i) => (
-                <Reveal key={h + i} delay={(i % 2) * 0.08}>
-                  <li className="flex items-baseline gap-6 border-b border-forest/10 py-6">
-                    <span className="w-6 shrink-0 text-[10px] tracking-[0.3em] text-clay">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="font-light tracking-[0.02em] text-forest">{h}</span>
-                  </li>
-                </Reveal>
-              ))}
-            </ul>
+      {/* Zanaat ve detaylar: footer rengiyle koyu bant */}
+      {(c.content || c.highlights.length > 0) && (
+        <section className="bg-forest-deep text-white">
+          <div
+            className={`mx-auto grid max-w-6xl gap-20 px-6 py-28 md:px-12 md:py-40 ${
+              c.content && c.highlights.length ? "md:grid-cols-[7fr_5fr] md:gap-24" : "max-w-3xl"
+            }`}
+          >
+            {c.content && (
+              <Reveal>
+                <Eyebrow className="mb-12 text-clay">Zanaat</Eyebrow>
+                <div className="post-body post-body--dark">
+                  <Markdown source={c.content} />
+                </div>
+              </Reveal>
+            )}
+            {c.highlights.length > 0 && (
+              <Reveal delay={0.1}>
+                <Eyebrow className="mb-12 text-clay">Detaylar</Eyebrow>
+                <ul className="border-t border-white/12">
+                  {c.highlights.map((h, i) => (
+                    <li key={h + i} className="flex items-baseline gap-6 border-b border-white/12 py-5">
+                      <span className="w-6 shrink-0 text-[10px] tracking-[0.3em] text-clay">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="font-light tracking-[0.02em] text-white/85">{h}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+            )}
           </div>
+        </section>
+      )}
+
+      {/* Galeri: devamı */}
+      {c.gallery.length > GALLERY_SPLIT && (
+        <section aria-label={`${c.title} galerisi devamı`} className="bg-mist px-4 py-32 md:px-12 md:py-44">
+          <CollectionGallery images={c.gallery} title={c.title} from={GALLERY_SPLIT} />
         </section>
       )}
 

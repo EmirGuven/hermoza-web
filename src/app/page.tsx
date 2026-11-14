@@ -12,6 +12,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getCollections, getPosts, getSetting } from "@/lib/content";
 import { phoneDigits } from "@/lib/content-types";
+import { BRAND_TAGLINE } from "@/lib/brand";
 import { SITE_URL, absUrl } from "@/lib/site";
 
 // Tüm içerik panelden (/admin) yönetilir; önbellekte tutulur, panelde kayıt yapılınca yenilenir.
@@ -52,8 +53,18 @@ function jsonLd(
     "@id": `${SITE_URL}/#isletme`,
     name: general.siteName,
     description: general.seoDescription,
+    slogan: BRAND_TAGLINE,
     url: `${SITE_URL}/`,
     logo: absUrl("/icon.png"),
+    knowsAbout: [
+      "Ölçüye özel mutfak",
+      "Ölçüye özel mobilya",
+      "Masif ahşap mobilya",
+      "Doğal taş tezgah",
+      "Yaşam alanı mobilyası",
+      "Banyo mobilyası",
+      "İç mimari mobilya üretimi",
+    ],
     image: absUrl(general.ogImage || "/og-hermoza.jpg"),
     telephone: contact.phone || undefined,
     email: contact.email || undefined,
@@ -69,7 +80,12 @@ function jsonLd(
           name: "Ölçüye özel mobilya",
           itemListElement: collections.map((c) => ({
             "@type": "Offer",
-            itemOffered: { "@type": "Service", name: c.title, description: c.body },
+            itemOffered: {
+              "@type": "Service",
+              name: c.title,
+              description: c.body,
+              ...(c.slug ? { url: `${SITE_URL}/koleksiyonlar/${c.slug}` } : {}),
+            },
           })),
         }
       : undefined,

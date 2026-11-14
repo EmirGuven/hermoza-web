@@ -555,3 +555,27 @@
   }
 }
 
+
+/* Koyu (footer yeşili) zeminde uzun yazı: koleksiyon "Zanaat" bandı */
+.post-body--dark {
+  color: rgb(255 255 255 / 0.72);
+}
+.post-body--dark h2,
+.post-body--dark h3,
+.post-body--dark strong,
+.post-body--dark blockquote {
+  color: #fff;
+}
+.post-body--dark h4,
+.post-body--dark a {
+  color: #c9957d;
+}
+.post-body--dark a:hover {
+  color: #fff;
+}
+.post-body--dark figcaption {
+  color: rgb(255 255 255 / 0.5);
+}
+.post-body--dark hr {
+  border-top-color: rgb(255 255 255 / 0.12);
+}

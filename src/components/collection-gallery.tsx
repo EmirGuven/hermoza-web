@@ -8,23 +8,26 @@ import type { GalleryImage } from "@/lib/content-types";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-type Row = { type: "full"; items: number[] } | { type: "pairA" | "pairB"; items: [number, number] };
+type RowType = "full" | "bento" | "bentoR" | "duo";
+type Row = { type: RowType; items: number[] };
+const SIZE: Record<RowType, number> = { full: 1, bento: 3, bentoR: 3, duo: 2 };
 
-/** Görselleri dergi düzenine böler: tam genişlik → asimetrik ikili → ters asimetrik ikili → … */
+/**
+ * Görselleri hizaları birebir oturan bir ızgaraya böler. Sıra:
+ * tam genişlik → büyük + üst üste iki küçük → eşit ikili → büyük sağda + iki küçük solda → …
+ * Kalan görsel sayısı bir düzene yetmezse daha küçük düzene geçilir.
+ */
 function layout(n: number): Row[] {
   const rows: Row[] = [];
-  const pattern = ["full", "pairA", "pairB"] as const;
+  const pattern: RowType[] = ["full", "bento", "duo", "bentoR"];
   let i = 0;
   let p = 0;
   while (i < n) {
-    const type = pattern[p++ % pattern.length];
-    if (type === "full" || i + 1 >= n) {
-      rows.push({ type: "full", items: [i] });
-      i += 1;
-    } else {
-      rows.push({ type, items: [i, i + 1] });
-      i += 2;
-    }
+    const left = n - i;
+    let type = pattern[p++ % pattern.length];
+    if (SIZE[type] > left) type = left >= 2 ? "duo" : "full";
+    rows.push({ type, items: Array.from({ length: SIZE[type] }, (_, k) => i + k) });
+    i += SIZE[type];
   }
   return rows;
 }
@@ -34,9 +37,9 @@ function Tile({
   index,
   total,
   alt,
-  className,
-  frame,
+  className = "",
   sizes,
+  delay = 0,
   onOpen,
 }: {
   img: GalleryImage;
@@ -44,22 +47,22 @@ function Tile({
   total: number;
   alt: string;
   className?: string;
-  frame: string;
   sizes: string;
+  delay?: number;
   onOpen: (i: number) => void;
 }) {
   return (
     <motion.figure
-      initial={{ opacity: 0, y: 60 }}
+      initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 1.2, ease: EASE }}
-      className={className}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 1.1, delay, ease: EASE }}
+      className={`relative min-h-0 ${className}`}
     >
       <button
         type="button"
         onClick={() => onOpen(index)}
-        className={`group relative block w-full cursor-zoom-in overflow-hidden bg-forest/5 ${frame}`}
+        className="group relative block h-full w-full cursor-zoom-in overflow-hidden bg-forest/5"
         aria-label={`${alt} — görsel ${index + 1} / ${total}, büyüt`}
       >
         <Image
@@ -67,26 +70,38 @@ function Tile({
           alt={img.caption || alt}
           fill
           sizes={sizes}
-          className="object-cover transition-transform duration-[1.6s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+          className="object-cover transition-transform duration-[1.8s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.035]"
         />
-        <span className="absolute inset-0 bg-forest-deep/0 transition-colors duration-700 group-hover:bg-forest-deep/15" />
-        <span className="absolute bottom-4 right-4 flex size-10 items-center justify-center rounded-full bg-white/90 text-forest opacity-0 transition-all duration-500 group-hover:opacity-100 max-md:hidden">
-          <Expand className="size-4" strokeWidth={1.5} />
+        {/* Görsel altı yazısı görselin üstünde: mobilde hep, masaüstünde üzerine gelince */}
+        <span className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-700 md:opacity-0 md:group-hover:opacity-100" />
+        <figcaption className="absolute inset-x-0 bottom-0 flex items-baseline gap-4 p-5 text-left text-white transition-all duration-700 md:translate-y-2 md:p-7 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+          <span className="text-[10px] tracking-[0.3em] text-white/70">{String(index + 1).padStart(2, "0")}</span>
+          {img.caption && <span className="text-[13px] font-light tracking-[0.06em]">{img.caption}</span>}
+        </figcaption>
+        <span className="absolute right-5 top-5 hidden size-9 items-center justify-center rounded-full bg-white/90 text-forest opacity-0 transition-opacity duration-500 group-hover:opacity-100 md:flex">
+          <Expand className="size-3.5" strokeWidth={1.5} />
         </span>
       </button>
-      <figcaption className="mt-4 flex items-baseline gap-4 text-[11px] tracking-[0.3em] text-ink/45">
-        <span className="text-clay">{String(index + 1).padStart(2, "0")}</span>
-        {img.caption && <span className="tracking-[0.12em] font-light text-ink/60">{img.caption}</span>}
-      </figcaption>
     </motion.figure>
   );
 }
 
 /**
- * Koleksiyon galerisi: görseller dergi düzeninde, büyük ve ön planda.
+ * Koleksiyon galerisi: hizalı ızgara, görseller büyük ve ön planda.
  * Tıklayınca tam ekran görüntüleyici: ok tuşları / kaydırma ile gezinme, Esc ile kapatma.
  */
-export function CollectionGallery({ images, title }: { images: GalleryImage[]; title: string }) {
+export function CollectionGallery({
+  images,
+  title,
+  from = 0,
+  to,
+}: {
+  images: GalleryImage[];
+  title: string;
+  /** Sayfada yalnızca bu aralık gösterilir (galeri bölünerek araya bölüm konabilir); büyük görüntüleyici tüm görsellerde gezinir */
+  from?: number;
+  to?: number;
+}) {
   const [open, setOpen] = useState<number | null>(null);
   const n = images.length;
   const closeBtn = useRef<HTMLButtonElement>(null);
@@ -111,40 +126,42 @@ export function CollectionGallery({ images, title }: { images: GalleryImage[]; t
     };
   }, [open, go]);
 
-  if (!n) return null;
-  const rows = layout(n);
-  const tile = (i: number, frame: string, sizes: string, className?: string) => (
-    <Tile
-      key={i}
-      img={images[i]}
-      index={i}
-      total={n}
-      alt={title}
-      frame={frame}
-      sizes={sizes}
-      className={className}
-      onOpen={setOpen}
-    />
+  const end = Math.min(to ?? n, n);
+  if (!n || from >= end) return null;
+  // Düzen aralığa göre kurulur, indeksler tüm galeriye göre kalır
+  const rows = layout(end - from).map((r) => ({ ...r, items: r.items.map((i) => i + from) }));
+  const tile = (i: number, sizes: string, className?: string, delay?: number) => (
+    <Tile key={i} img={images[i]} index={i} total={n} alt={title} sizes={sizes} className={className} delay={delay} onOpen={setOpen} />
   );
 
+  // Masaüstünde her satırın oranı sabit: görseller birebir hizalanır. Mobilde alt alta.
   return (
     <>
-      <div className="mx-auto max-w-[1680px] space-y-20 md:space-y-36">
-        {rows.map((row, r) =>
-          row.type === "full" ? (
-            <div key={r}>{tile(row.items[0], "aspect-[4/5] md:aspect-[21/10]", "100vw")}</div>
-          ) : row.type === "pairA" ? (
-            <div key={r} className="grid gap-20 md:grid-cols-[7fr_5fr] md:gap-12">
-              {tile(row.items[0], "aspect-[4/5] md:aspect-[5/6]", "(min-width: 768px) 58vw, 100vw")}
-              {tile(row.items[1], "aspect-[4/5]", "(min-width: 768px) 42vw, 100vw", "md:mt-48")}
+      <div className="mx-auto max-w-[1680px] space-y-3 md:space-y-4">
+        {rows.map((row, r) => {
+          const [a, b, c] = row.items;
+          if (row.type === "full")
+            return (
+              <div key={r} className="aspect-[4/5] md:aspect-[21/9]">
+                {tile(a, "100vw", "h-full")}
+              </div>
+            );
+          if (row.type === "duo")
+            return (
+              <div key={r} className="grid gap-3 md:grid-cols-2 md:gap-4">
+                {tile(a, "(min-width: 768px) 50vw, 100vw", "aspect-[4/5]")}
+                {tile(b, "(min-width: 768px) 50vw, 100vw", "aspect-[4/5]", 0.08)}
+              </div>
+            );
+          const rev = row.type === "bentoR";
+          return (
+            <div key={r} className="grid gap-3 md:aspect-[16/9] md:grid-cols-3 md:grid-rows-2 md:gap-4">
+              {tile(a, "(min-width: 768px) 66vw, 100vw", `aspect-[4/5] md:aspect-auto md:col-span-2 md:row-span-2 ${rev ? "md:col-start-2 md:row-start-1" : ""}`)}
+              {tile(b, "(min-width: 768px) 33vw, 100vw", `aspect-[4/5] md:aspect-auto ${rev ? "md:col-start-1 md:row-start-1" : ""}`, 0.08)}
+              {tile(c, "(min-width: 768px) 33vw, 100vw", `aspect-[4/5] md:aspect-auto ${rev ? "md:col-start-1 md:row-start-2" : ""}`, 0.16)}
             </div>
-          ) : (
-            <div key={r} className="grid gap-20 md:grid-cols-[5fr_7fr] md:items-end md:gap-12">
-              {tile(row.items[0], "aspect-[3/4]", "(min-width: 768px) 42vw, 100vw", "md:mb-40")}
-              {tile(row.items[1], "aspect-[4/5] md:aspect-[6/5]", "(min-width: 768px) 58vw, 100vw")}
-            </div>
-          )
-        )}
+          );
+        })}
       </div>
 
       <AnimatePresence>
