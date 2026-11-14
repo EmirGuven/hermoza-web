@@ -316,6 +316,21 @@
     pointer-events: none;
   }
 
+  .cx {
+    touch-action: pan-y;
+  }
+  /* Otomatik geçiş ilerleme çizgisi (açık panelin altında) */
+  .cx[data-auto] .cx-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
+    height: 2px;
+    width: 100%;
+    background: #c9957d;
+    transform-origin: left;
+    animation: cx-progress 5s linear forwards;
+  }
   /* Açık panel */
   .cx-item[data-open] .cx-img {
     transform: scale(1);
@@ -336,7 +351,27 @@
   }
 }
 
+@keyframes cx-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.cx-progress {
+  display: none;
+}
+@media (max-width: 767px) {
+  .cx[data-auto] .cx-progress {
+    display: block;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .cx-progress {
+    display: none !important;
+  }
   .cx-item,
   .cx-img,
   .cx-shade,

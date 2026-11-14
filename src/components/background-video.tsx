@@ -18,6 +18,9 @@ export function BackgroundVideo({ video, className = "" }: { video: VideoSet; cl
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          // iOS Safari yalnızca sessiz videoyu otomatik oynatır (React "muted" özelliğini HTML'e yazmaz)
+          v.muted = true;
+          v.defaultMuted = true;
           if (v.preload === "none") {
             v.preload = "auto";
             v.load();

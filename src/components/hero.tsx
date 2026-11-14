@@ -14,6 +14,10 @@ export function Hero({ video, title }: { video: VideoSet; title: string }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       v.pause();
     } else {
+      // React sunucu HTML'ine "muted" özelliğini yazmaz; iOS Safari sessiz olmayan videoyu
+      // otomatik oynatmaz. Oynatmadan önce kesin olarak sessize al.
+      v.muted = true;
+      v.defaultMuted = true;
       v.play().catch(() => {});
     }
   }, [video.desktop, video.mobile]);
@@ -30,6 +34,7 @@ export function Hero({ video, title }: { video: VideoSet; title: string }) {
           className="absolute inset-0 h-full w-full object-cover"
           poster={video.poster || undefined}
           muted
+          autoPlay
           loop
           playsInline
           preload="metadata"

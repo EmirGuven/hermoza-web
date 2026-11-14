@@ -77,6 +77,33 @@ services:
       # Paylaşılan PostgreSQL: DATABASE_URL host'u "postgres"
       - db_internal
 
+  # Yüklenen medyayı (/media/...) Next yerine nginx servis eder: videolarda Content-Length ve
+  # parçalı (Range/206) cevap gerekir, yoksa iPhone Safari videoyu oynatmaz. Ayrıntı: docker/media-nginx.conf
+  # Traefik'te /media yolu bu servise, geri kalan her şey hermoza-web'e gider (öncelik daha yüksek).
+  media:
+    image: nginx:1.27-alpine
+    container_name: hermoza-media
+    restart: unless-stopped
+    volumes:
+      - ./uploads:/usr/share/nginx/html/media:ro
+      - ./docker/media-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.hermoza-media.rule=Host(`hermoza.com.tr`) && PathPrefix(`/media/`)"
+      - "traefik.http.routers.hermoza-media.entrypoints=web"
+      - "traefik.http.routers.hermoza-media.priority=100"
+      - "traefik.http.routers.hermoza-media.service=hermoza-media"
+      - "traefik.http.routers.hermoza-media-secure.rule=Host(`hermoza.com.tr`) && PathPrefix(`/media/`)"
+      - "traefik.http.routers.hermoza-media-secure.entrypoints=websecure"
+      - "traefik.http.routers.hermoza-media-secure.tls=true"
+      - "traefik.http.routers.hermoza-media-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hermoza-media-secure.priority=100"
+      - "traefik.http.routers.hermoza-media-secure.service=hermoza-media"
+      - "traefik.http.services.hermoza-media.loadbalancer.server.port=80"
+    networks:
+      - proxy
+
 secrets:
   database_url:
     environment: DATABASE_URL_BUILD
