@@ -29,11 +29,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const [post, g] = await Promise.all([getPost(slug), getSetting("general")]);
   if (!post) return { title: "Yazı bulunamadı" };
-  const title = post.seoTitle || post.title;
+  const title = post.seoTitle || `${post.title} | ${g.siteName}`;
   const desc = description(post);
   const image = post.image || g.ogImage || "/og-hermoza.jpg";
   return {
-    title,
+    title: post.seoTitle ? { absolute: post.seoTitle } : post.title,
     description: desc,
     alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {

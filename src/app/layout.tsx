@@ -24,7 +24,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   // Paylaşım kartları ve kanonik adresler için mutlak adres tabanı
   metadataBase: new URL(SITE_URL),
-  title: "Hermoza Kitchen & Atelier — Ölçüye özel mutfak ve mobilya",
+  // Alt sayfa başlıkları "Sayfa | Hermoza Kitchen & Atelier" olarak tamamlanır (ana sayfa kendi başlığını tam verir)
+  title: {
+    default: "Hermoza Kitchen & Atelier — Ölçüye özel mutfak ve mobilya",
+    template: "%s | Hermoza Kitchen & Atelier",
+  },
   description:
     "Mutfak, yaşam alanı ve giyinme odası için atölyede üretilen ölçüye özel masif ahşap mobilyalar.",
 };

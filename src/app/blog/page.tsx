@@ -7,13 +7,16 @@ import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getPosts, getSetting } from "@/lib/content";
+import { breadcrumb, ldJson } from "@/lib/schema";
+import { SITE_URL, absUrl } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [g, home] = await Promise.all([getSetting("general"), getSetting("home")]);
-  const title = `${home.journal.title} — Blog`;
+  const pageTitle = `Blog — ${home.journal.title}: Mutfak ve Mobilya Rehberleri`;
+  const title = `${pageTitle} | ${g.siteName}`;
   const description = `${g.siteName} atölyesinden malzeme rehberleri, proje hikayeleri ve ölçüye özel mobilya üzerine notlar.`;
   return {
-    title,
+    title: pageTitle,
     description,
     alternates: { canonical: "/blog" },
     openGraph: {
@@ -36,9 +39,32 @@ export default async function BlogIndex() {
     getPosts(),
   ]);
   const [featured, ...rest] = posts;
+  const jsonLd = ldJson({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Blog",
+        "@id": `${SITE_URL}/blog#blog`,
+        url: `${SITE_URL}/blog`,
+        name: `${general.siteName} Blog`,
+        description: "Malzeme rehberleri, proje hikayeleri ve ölçüye özel mobilya üzerine atölyeden notlar.",
+        inLanguage: "tr-TR",
+        publisher: { "@id": `${SITE_URL}/#isletme` },
+        blogPost: posts.map((p) => ({
+          "@type": "BlogPosting",
+          headline: p.title,
+          url: `${SITE_URL}/blog/${p.slug}`,
+          datePublished: new Date(p.publishedAt).toISOString(),
+          ...(p.image ? { image: absUrl(p.image) } : {}),
+        })),
+      },
+      breadcrumb([{ name: "Blog", path: "/blog" }]),
+    ],
+  });
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <SiteHeader general={general} contact={contact} home={false} />
       <main>
         <section className="bg-forest px-6 pb-20 pt-40 text-white md:px-12 md:pb-28 md:pt-48">

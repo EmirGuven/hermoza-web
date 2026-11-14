@@ -28,11 +28,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const [c, g] = await Promise.all([getCollection(slug), getSetting("general")]);
   if (!c) return { title: "Koleksiyon bulunamadı" };
-  const title = c.seoTitle || `${c.title} — ${g.siteName}`;
+  // Panelde SEO başlığı girilmediyse aranan ifadeyle: "Ölçüye Özel Mutfak Tasarımı | Hermoza Kitchen & Atelier"
+  const pageTitle = c.seoTitle || `Ölçüye Özel ${c.title} Tasarımı`;
+  const title = `${pageTitle} | ${g.siteName}`;
   const desc = description(c);
   const image = c.image || g.ogImage || "/og-hermoza.jpg";
   return {
-    title,
+    title: c.seoTitle ? { absolute: c.seoTitle } : pageTitle,
     description: desc,
     alternates: { canonical: `/koleksiyonlar/${c.slug}` },
     openGraph: {

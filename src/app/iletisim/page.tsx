@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getSetting } from "@/lib/content";
 import { phoneDigits } from "@/lib/content-types";
+import { breadcrumb, ldJson } from "@/lib/schema";
 import { SITE_URL } from "@/lib/site";
 
 const SHOWROOM = "/media/images/2.jpg";
@@ -16,10 +17,10 @@ export async function generateMetadata(): Promise<Metadata> {
     getSetting("general"),
     getSetting("contact"),
   ]);
-  const title = `İletişim — ${g.siteName}`;
+  const title = `İletişim ve Showroom | ${g.siteName}`;
   const description = `Showroom’da buluşalım. ${contact.address ? `${contact.address}. ` : ""}Ücretsiz keşif için randevu oluşturun; 48 saat içinde dönüş yapıyoruz.`;
   return {
-    title,
+    title: "İletişim ve Showroom",
     description,
     alternates: { canonical: "/iletisim" },
     openGraph: {
@@ -84,15 +85,20 @@ export default async function ContactPage() {
     },
   ].filter((s) => s.href);
 
-  const jsonLd = JSON.stringify({
+  const jsonLd = ldJson({
     "@context": "https://schema.org",
-    "@type": "ContactPage",
-    "@id": `${SITE_URL}/iletisim#sayfa`,
-    url: `${SITE_URL}/iletisim`,
-    name: `İletişim — ${general.siteName}`,
-    about: { "@id": `${SITE_URL}/#isletme` },
-    inLanguage: "tr-TR",
-  }).replace(/</g, "\\u003c");
+    "@graph": [
+      {
+        "@type": "ContactPage",
+        "@id": `${SITE_URL}/iletisim#sayfa`,
+        url: `${SITE_URL}/iletisim`,
+        name: `İletişim — ${general.siteName}`,
+        about: { "@id": `${SITE_URL}/#isletme` },
+        inLanguage: "tr-TR",
+      },
+      breadcrumb([{ name: "İletişim", path: "/iletisim" }]),
+    ],
+  });
 
   const link = "transition-colors hover:text-rust";
 

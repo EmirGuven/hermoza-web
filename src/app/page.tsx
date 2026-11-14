@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const g = await getSetting("general");
   const image = g.ogImage || "/og-hermoza.jpg";
   return {
-    title: g.seoTitle,
+    title: { absolute: g.seoTitle },
     description: g.seoDescription,
     alternates: { canonical: "/" },
     openGraph: {

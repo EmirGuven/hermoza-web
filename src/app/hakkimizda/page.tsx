@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { BRAND_PILLARS, BRAND_PROCESS, BRAND_STORY, faqWithAddress } from "@/lib/brand";
 import { getCollections, getSetting } from "@/lib/content";
+import { breadcrumb } from "@/lib/schema";
 import { SITE_URL } from "@/lib/site";
 
 const HERO = "/media/images/img-4970.png";
@@ -15,10 +16,10 @@ const LIVING = "/media/images/1.jpg";
 
 export async function generateMetadata(): Promise<Metadata> {
   const g = await getSetting("general");
-  const title = `Hakkımızda — ${g.siteName}`;
+  const title = `Hakkımızda | ${g.siteName}`;
   const description = BRAND_STORY[0];
   return {
-    title,
+    title: "Hakkımızda",
     description,
     alternates: { canonical: "/hakkimizda" },
     openGraph: { type: "website", locale: "tr_TR", url: "/hakkimizda", siteName: g.siteName, title, description, images: [{ url: HERO }] },
@@ -48,6 +49,7 @@ export default async function AboutPage() {
         about: { "@id": `${SITE_URL}/#isletme` },
         inLanguage: "tr-TR",
       },
+      breadcrumb([{ name: "Hakkımızda", path: "/hakkimizda" }]),
       {
         "@type": "FAQPage",
         mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),

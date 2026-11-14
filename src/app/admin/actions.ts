@@ -21,6 +21,7 @@ import {
 import { getSession, requireAdmin } from "@/lib/session";
 import { SITE_TAG, readSetting } from "@/lib/content";
 import type { NavLink, SettingKey } from "@/lib/content-types";
+import { pingIndexNow } from "@/lib/indexnow";
 import { resolveUpload } from "@/lib/media";
 import { adminInbox, appointmentIcs, sendTemplate, siteUrl, trDate, trTime } from "@/lib/mail";
 import { SAMPLE_VARS, templateDef } from "@/lib/mail-templates";
@@ -63,6 +64,7 @@ async function saveSetting(key: SettingKey, value: unknown) {
     .values({ key, value })
     .onConflictDoUpdate({ target: settings.key, set: { value, updatedAt: new Date() } });
   updateTag(SITE_TAG);
+  after(() => pingIndexNow(key === "contact" ? ["/", "/iletisim"] : ["/"]));
 }
 
 /* ---------------- Oturum ---------------- */
@@ -227,6 +229,7 @@ export async function saveCollection(_: ActionState, f: FormData): Promise<Actio
   if (id) {
     await db.update(collections).set(data).where(eq(collections.id, id));
     updateTag(SITE_TAG);
+    if (data.active) after(() => pingIndexNow(["/", `/koleksiyonlar/${data.slug}`]));
     return done(data.slug !== base ? `Kaydedildi. Bu adres kullanıldığı için “${data.slug}” verildi.` : "Kaydedildi");
   }
   const [{ max }] = await db.select({ max: sql<number>`coalesce(max(${collections.sort}), 0)` }).from(collections);
@@ -235,6 +238,7 @@ export async function saveCollection(_: ActionState, f: FormData): Promise<Actio
     .values({ ...data, sort: Number(max) + 1 })
     .returning({ id: collections.id });
   updateTag(SITE_TAG);
+  if (data.active) after(() => pingIndexNow(["/", `/koleksiyonlar/${data.slug}`]));
   redirect(`/admin/koleksiyonlar/${row.id}?kaydedildi=1`);
 }
 
@@ -326,10 +330,12 @@ export async function savePost(_: ActionState, f: FormData): Promise<ActionState
   if (id) {
     await db.update(journalPosts).set(data).where(eq(journalPosts.id, id));
     updateTag(SITE_TAG);
+    if (data.active) after(() => pingIndexNow(["/blog", `/blog/${data.slug}`]));
     return done(data.slug !== base ? `Kaydedildi. Bu adres kullanıldığı için “${data.slug}” verildi.` : "Kaydedildi");
   }
   const [row] = await db.insert(journalPosts).values(data).returning({ id: journalPosts.id });
   updateTag(SITE_TAG);
+  if (data.active) after(() => pingIndexNow(["/", "/blog", `/blog/${data.slug}`]));
   redirect(`/admin/blog/${row.id}?kaydedildi=1`);
 }
 
