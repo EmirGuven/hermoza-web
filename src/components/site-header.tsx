@@ -41,8 +41,11 @@ export function SiteHeader({
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center px-6 text-white transition-[height,background-color] duration-500 md:px-12 ${
-          scrolled ? "h-16 bg-forest-deep/85 backdrop-blur-md" : "h-20 bg-black/10 backdrop-blur-[2px]"
+        // Kaydırınca: mobilde beyaz zemin + koyu yeşil yazı/logo, masaüstünde koyu yeşil zemin + beyaz
+        className={`fixed inset-x-0 top-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center px-6 transition-[height,background-color,color,box-shadow] duration-500 md:px-12 ${
+          scrolled
+            ? "h-16 bg-white/95 text-forest-deep shadow-[0_1px_0_rgb(21_58_52/0.08)] backdrop-blur-md md:bg-forest-deep/85 md:text-white md:shadow-none"
+            : "h-20 bg-black/10 text-white backdrop-blur-[2px]"
         }`}
       >
         <button
@@ -50,7 +53,7 @@ export function SiteHeader({
           onClick={() => setOpen(true)}
           aria-expanded={open}
           aria-controls="site-menu"
-          className="group flex w-fit items-center gap-4 text-[11px] uppercase tracking-[0.3em] text-white/70 transition-colors hover:text-white"
+          className="group flex w-fit items-center gap-4 text-[11px] uppercase tracking-[0.3em] opacity-75 transition-opacity hover:opacity-100"
         >
           <span className="flex w-7 flex-col gap-[5px]">
             <span className="h-px w-full bg-current" />
@@ -58,19 +61,34 @@ export function SiteHeader({
           </span>
           <span className="hidden sm:inline">Menü</span>
         </button>
-        <a href={home ? "#" : "/"} aria-label="Hermoza ana sayfa">
+        <a href={home ? "#" : "/"} aria-label="Hermoza ana sayfa" className="relative block">
           <Image
             src={general.logo}
             alt={general.siteName}
             width={212}
             height={522}
             priority
-            className={`w-auto transition-[height] duration-500 ${scrolled ? "h-9" : "h-11"}`}
+            className={`w-auto transition-[height,opacity] duration-500 ${scrolled ? "h-9 max-md:opacity-0" : "h-11"}`}
+          />
+          {/* Mobilde kaydırınca beyaz zeminde logo koyu yeşil: aynı logo maske olarak kullanılıp boyanır */}
+          <span
+            aria-hidden
+            className={`absolute inset-0 bg-forest-deep transition-opacity duration-500 md:hidden ${scrolled ? "opacity-100" : "opacity-0"}`}
+            style={{
+              WebkitMaskImage: `url("${general.logo}")`,
+              maskImage: `url("${general.logo}")`,
+              WebkitMaskSize: "contain",
+              maskSize: "contain",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskPosition: "center",
+              maskPosition: "center",
+            }}
           />
         </a>
         <a
           href={fix(general.headerCtaHref)}
-          className="justify-self-end text-[11px] uppercase tracking-[0.3em] text-white/70 transition-colors hover:text-white"
+          className="justify-self-end text-[11px] uppercase tracking-[0.3em] opacity-75 transition-opacity hover:opacity-100"
         >
           {general.headerCtaLabel}
         </a>
