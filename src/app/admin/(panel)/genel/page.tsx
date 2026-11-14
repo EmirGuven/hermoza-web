@@ -19,7 +19,8 @@ export default async function GeneralPage() {
 
       <Card title="Header">
         <div className="grid-2">
-          <MediaField name="logo" label="Logo (ikon)" defaultValue={g.logo} dark hint="Şeffaf zeminli, beyaz PNG önerilir." />
+          <MediaField name="headerLogo" label="Header logosu" defaultValue={g.headerLogo} dark hint="Sitenin üstündeki logo (imza). Şeffaf zeminli, beyaz PNG önerilir. Boş bırakılırsa ikon kullanılır." />
+          <MediaField name="logo" label="Logo (ikon)" defaultValue={g.logo} dark hint="Admin paneli ve e-postalarda kullanılır. Şeffaf zeminli, beyaz PNG önerilir." />
           <MediaField name="menuImage" label="Tam ekran menü görseli" defaultValue={g.menuImage} />
           <TextField label="Sağ üst buton yazısı" name="headerCtaLabel" defaultValue={g.headerCtaLabel} />
           <TextField label="Sağ üst buton bağlantısı" name="headerCtaHref" defaultValue={g.headerCtaHref} hint="Sayfa içi bölüm için #iletisim gibi yazın." />

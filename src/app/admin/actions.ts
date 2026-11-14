@@ -111,6 +111,7 @@ export async function saveGeneral(_: ActionState, f: FormData): Promise<ActionSt
     seoTitle: str(f, "seoTitle"),
     seoDescription: str(f, "seoDescription"),
     logo: str(f, "logo"),
+    headerLogo: str(f, "headerLogo"),
     menuImage: str(f, "menuImage"),
     headerCtaLabel: str(f, "headerCtaLabel"),
     headerCtaHref: str(f, "headerCtaHref"),

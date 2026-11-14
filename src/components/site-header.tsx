@@ -20,6 +20,9 @@ export function SiteHeader({
   home?: boolean;
 }) {
   const links = general.menuLinks;
+  // Header'da imza logosu; ayarlanmamışsa ikon
+  const logo = general.headerLogo || general.logo;
+  const wide = logo === general.headerLogo;
   const fix = (href: string) => (!home && href.startsWith("#") ? `/${href}` : href);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -72,20 +75,23 @@ export function SiteHeader({
         </button>
         <a href={home ? "#" : "/"} aria-label="Hermoza ana sayfa" className="relative block">
           <Image
-            src={general.logo}
+            src={logo}
             alt={general.siteName}
-            width={212}
-            height={522}
+            // İmza yatay (≈ 995x360), ikon dikey; görünen boyut CSS yüksekliğiyle belirlenir
+            width={wide ? 995 : 212}
+            height={wide ? 360 : 522}
             priority
-            className={`w-auto transition-[height,opacity] duration-500 ${scrolled ? "h-9 max-md:opacity-0" : "h-11"}`}
+            className={`w-auto transition-[height,opacity] duration-500 ${
+              wide ? (scrolled ? "h-8 max-md:opacity-0 md:h-10" : "h-9 md:h-14") : scrolled ? "h-9 max-md:opacity-0" : "h-11"
+            }`}
           />
           {/* Mobilde kaydırınca beyaz zeminde logo koyu yeşil: aynı logo maske olarak kullanılıp boyanır */}
           <span
             aria-hidden
             className={`absolute inset-0 bg-forest-deep transition-opacity duration-500 md:hidden ${scrolled ? "opacity-100" : "opacity-0"}`}
             style={{
-              WebkitMaskImage: `url("${general.logo}")`,
-              maskImage: `url("${general.logo}")`,
+              WebkitMaskImage: `url("${logo}")`,
+              maskImage: `url("${logo}")`,
               WebkitMaskSize: "contain",
               maskSize: "contain",
               WebkitMaskRepeat: "no-repeat",
@@ -97,7 +103,7 @@ export function SiteHeader({
         </a>
         <a
           href={fix(general.headerCtaHref)}
-          className="justify-self-end text-[11px] uppercase tracking-[0.3em] opacity-75 transition-opacity hover:opacity-100"
+          className="justify-self-end whitespace-nowrap text-[10px] uppercase tracking-[0.22em] opacity-75 transition-opacity hover:opacity-100 md:text-[11px] md:tracking-[0.3em]"
         >
           {general.headerCtaLabel}
         </a>

@@ -7,7 +7,9 @@ export type GeneralSettings = {
   siteName: string;
   seoTitle: string;
   seoDescription: string;
-  logo: string; // header'daki ikon
+  logo: string; // ikon: admin paneli, e-postalar (boşsa header da bunu kullanır)
+  /** Sitenin üst menüsündeki logo (imza). Şeffaf zeminli, beyaz. Boşsa ikon kullanılır. */
+  headerLogo: string;
   menuImage: string; // tam ekran menüdeki görsel
   headerCtaLabel: string;
   headerCtaHref: string;
@@ -91,6 +93,7 @@ export const defaultGeneral: GeneralSettings = {
   seoDescription:
     "Mutfak, yaşam alanı ve giyinme odası için atölyede üretilen ölçüye özel masif ahşap mobilyalar.",
   logo: m("brand/hermoza-icon-white.png"),
+  headerLogo: m("brand/hermoza-imza-white.png"),
   menuImage: m("images/proje-bodrum-yazlik.jpg"),
   headerCtaLabel: "Randevu al",
   headerCtaHref: "#iletisim",
