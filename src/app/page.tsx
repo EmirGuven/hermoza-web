@@ -10,7 +10,7 @@ import { Hero } from "@/components/hero";
 import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getCollections, getPosts, getSetting } from "@/lib/content";
+import { getCollections, getMediaDates, getPosts, getSetting } from "@/lib/content";
 import { phoneDigits } from "@/lib/content-types";
 import { BRAND_TAGLINE } from "@/lib/brand";
 import { SITE_URL, absUrl } from "@/lib/site";
@@ -45,7 +45,9 @@ export async function generateMetadata(): Promise<Metadata> {
 function jsonLd(
   general: Awaited<ReturnType<typeof getSetting<"general">>>,
   contact: Awaited<ReturnType<typeof getSetting<"contact">>>,
-  collections: Awaited<ReturnType<typeof getCollections>>
+  collections: Awaited<ReturnType<typeof getCollections>>,
+  home: Awaited<ReturnType<typeof getSetting<"home">>>,
+  mediaDates: Record<string, string>
 ) {
   const sameAs = [contact.facebook, contact.instagram].filter(Boolean);
   const business = {
@@ -98,8 +100,23 @@ function jsonLd(
     inLanguage: "tr-TR",
     publisher: { "@id": `${SITE_URL}/#isletme` },
   };
+  // Videolar: Google Video aramasında görünsün (yükleme tarihi medya kaydından)
+  const videos = [
+    { v: home.hero, name: `${general.siteName} tanıtım filmi`, description: general.seoDescription },
+    { v: home.bespoke.video, name: `${general.siteName} atölye ve zanaat`, description: home.bespoke.text || home.bespoke.heading },
+  ]
+    .filter(({ v }) => v.desktop && v.poster && mediaDates[v.desktop])
+    .map(({ v, name, description }) => ({
+      "@type": "VideoObject",
+      name,
+      description,
+      thumbnailUrl: absUrl(v.poster),
+      contentUrl: absUrl(v.desktop),
+      uploadDate: mediaDates[v.desktop],
+      publisher: { "@id": `${SITE_URL}/#isletme` },
+    }));
   // </script> kaçışı: içerikteki "<" karakterleri güvenli hale getirilir
-  return JSON.stringify({ "@context": "https://schema.org", "@graph": [business, website] }).replace(/</g, "\\u003c");
+  return JSON.stringify({ "@context": "https://schema.org", "@graph": [business, website, ...videos] }).replace(/</g, "\\u003c");
 }
 
 function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -124,18 +141,19 @@ function Highlighted({ text, highlight }: { text: string; highlight: string }) {
 }
 
 export default async function Home() {
-  const [general, contact, home, collections, journal] = await Promise.all([
+  const [general, contact, home, collections, journal, mediaDates] = await Promise.all([
     getSetting("general"),
     getSetting("contact"),
     getSetting("home"),
     getCollections(),
     getPosts(),
+    getMediaDates(),
   ]);
   const tel = contact.phone ? `tel:+${phoneDigits(contact.phone)}` : "";
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(general, contact, collections) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(general, contact, collections, home, mediaDates) }} />
       <SiteHeader general={general} contact={contact} />
 
       <main>

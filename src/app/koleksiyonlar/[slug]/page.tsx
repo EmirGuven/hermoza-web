@@ -32,7 +32,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const pageTitle = c.seoTitle || `Ölçüye Özel ${c.title} Tasarımı`;
   const title = `${pageTitle} | ${g.siteName}`;
   const desc = description(c);
-  const image = c.image || g.ogImage || "/og-hermoza.jpg";
   return {
     title: c.seoTitle ? { absolute: c.seoTitle } : pageTitle,
     description: desc,
@@ -44,9 +43,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: g.siteName,
       title,
       description: desc,
-      images: [{ url: image, alt: c.title }],
     },
-    twitter: { card: "summary_large_image", title, description: desc, images: [image] },
+    // Paylaşım görseli: aynı klasördeki opengraph-image.tsx (kapak + başlık + imza)
+    twitter: { card: "summary_large_image", title, description: desc },
   };
 }
 

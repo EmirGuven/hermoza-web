@@ -2,7 +2,7 @@ import "server-only";
 import { and, asc, desc, eq, max } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 import { db } from "@/lib/db";
-import { collections, journalPosts, settings } from "@/db/schema";
+import { collections, journalPosts, media, settings } from "@/db/schema";
 import {
   SETTING_DEFAULTS,
   defaultCollections,
@@ -129,3 +129,15 @@ export async function getPost(slug: string): Promise<BlogPost | null> {
 
 /** Eski ad: ana sayfa ve llms.txt */
 export const getJournal = getPosts;
+
+/** Medya dosyalarının yüklenme tarihleri (/media/... adresine göre) — video yapılandırılmış verisi için */
+export async function getMediaDates(): Promise<Record<string, string>> {
+  "use cache";
+  cacheTag(SITE_TAG);
+  try {
+    const rows = await db.select({ path: media.path, at: media.createdAt }).from(media);
+    return Object.fromEntries(rows.map((r) => [`/media/${r.path}`, new Date(r.at).toISOString()]));
+  } catch {
+    return {};
+  }
+}

@@ -31,7 +31,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return { title: "Yazı bulunamadı" };
   const title = post.seoTitle || `${post.title} | ${g.siteName}`;
   const desc = description(post);
-  const image = post.image || g.ogImage || "/og-hermoza.jpg";
   return {
     title: post.seoTitle ? { absolute: post.seoTitle } : post.title,
     description: desc,
@@ -46,9 +45,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: new Date(post.publishedAt).toISOString(),
       modifiedTime: new Date(post.updatedAt).toISOString(),
       section: post.category || undefined,
-      images: [{ url: image, alt: post.title }],
     },
-    twitter: { card: "summary_large_image", title, description: desc, images: [image] },
+    // Paylaşım görseli: aynı klasördeki opengraph-image.tsx (kapak + başlık + imza)
+    twitter: { card: "summary_large_image", title, description: desc },
   };
 }
 
