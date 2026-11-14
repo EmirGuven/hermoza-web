@@ -54,7 +54,7 @@ function Toggle({
   onChange?: (v: boolean) => void;
 }) {
   return (
-    <label className={`flex items-center gap-2 text-[12.5px] ${locked ? "cursor-not-allowed text-white/60" : "cursor-pointer text-white/90"}`}>
+    <label className={`flex items-center gap-1.5 text-[11.5px] ${locked ? "cursor-not-allowed text-white/60" : "cursor-pointer text-white/90"}`}>
       <span className="relative inline-flex">
         <input
           type="checkbox"
@@ -64,13 +64,13 @@ function Toggle({
           onChange={(e) => onChange?.(e.target.checked)}
         />
         <span
-          className={`h-5 w-9 rounded-full transition-colors ${
+          className={`h-4 w-7 rounded-full transition-colors ${
             locked ? "bg-white/25" : checked ? "bg-rust" : "bg-white/15"
           } peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-clay`}
         />
         <span
-          className={`absolute top-0.5 size-4 rounded-full bg-white shadow transition-transform ${
-            checked ? "translate-x-[18px]" : "translate-x-0.5"
+          className={`absolute top-0.5 size-3 rounded-full bg-white shadow transition-transform ${
+            checked ? "translate-x-[14px]" : "translate-x-0.5"
           } ${locked ? "opacity-70" : ""}`}
         />
       </span>
@@ -82,8 +82,9 @@ function Toggle({
 export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean }) {
   // Sunucuda "?" döner: pencere ilk HTML'de çizilmez, tarayıcıda karar verilir
   const consent = useSyncExternalStore(consentStore.subscribe, consentStore.get, () => "?");
-  const [olcum, setOlcum] = useState(false);
-  const [pazarlama, setPazarlama] = useState(false);
+  // Ölçüm ve pazarlama varsayılan açık gelir; ziyaretçi kapatıp "Seçimimi kaydet" diyebilir
+  const [olcum, setOlcum] = useState(true);
+  const [pazarlama, setPazarlama] = useState(true);
   const [popup, setPopup] = useState(false);
 
   useEffect(() => {
@@ -108,7 +109,8 @@ export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean })
   }, [consent, newsletterPopup]);
 
   const selected = (): Category[] => [...(olcum ? ["olcum" as const] : []), ...(pazarlama ? ["pazarlama" as const] : [])];
-  const custom = olcum || pazarlama;
+  // Yalnızca biri açıksa "Seçimimi kaydet", aksi halde "Tümünü reddet" gösterilir
+  const custom = olcum !== pazarlama;
 
   return (
     <>
@@ -122,12 +124,12 @@ export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean })
             role="dialog"
             aria-modal="false"
             aria-labelledby="cookie-title"
-            className="fixed inset-x-3 bottom-3 z-[70] mx-auto max-h-[80svh] max-w-[720px] overflow-y-auto bg-[#262626]/95 p-5 font-sans text-white shadow-2xl backdrop-blur-md md:bottom-5 md:p-6"
+            className="fixed inset-x-3 bottom-3 z-[70] max-h-[70svh] overflow-y-auto md:bottom-5 md:left-5 md:right-auto md:w-[min(720px,calc(100vw-40px))] bg-[#262626]/95 px-4 py-3.5 font-sans text-white shadow-2xl backdrop-blur-md md:px-5 md:py-4"
           >
-            <h2 id="cookie-title" className="mb-2.5 text-sm font-semibold tracking-wide">
+            <h2 id="cookie-title" className="mb-1.5 text-[13px] font-semibold tracking-wide">
               Çerez Tercihleriniz
             </h2>
-            <div className="space-y-2 text-[12.5px] font-light leading-relaxed text-white/80">
+            <div className="space-y-1 text-[11.5px] font-light leading-normal text-white/80">
               <p>
                 Hermoza Kitchen &amp; Atelier olarak sitemizin güvenli ve sorunsuz çalışması için zorunlu
                 çerezler kullanıyoruz. Onay vermeniz halinde, hangi koleksiyonların ilginizi çektiğini anlamak
@@ -145,25 +147,25 @@ export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean })
               </p>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3">
+            <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-2">
               <Toggle label="Zorunlu" checked locked />
               <Toggle label="Ölçüm" checked={olcum} onChange={setOlcum} />
               <Toggle label="Pazarlama" checked={pazarlama} onChange={setPazarlama} />
             </div>
 
-            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
               <Link
                 href="/cerez-politikasi"
-                className="rounded-full bg-white/15 px-5 py-2 text-center text-[12.5px] font-semibold transition-colors hover:bg-white/25"
+                className="rounded-full bg-white/15 px-4 py-1.5 text-center text-[11.5px] font-semibold transition-colors hover:bg-white/25"
               >
                 Daha fazla bilgi
               </Link>
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-col gap-1.5 sm:flex-row">
                 {custom ? (
                   <button
                     type="button"
                     onClick={() => consentStore.set(selected())}
-                    className="rounded-full bg-white/15 px-5 py-2 text-[12.5px] font-semibold transition-colors hover:bg-white/25"
+                    className="rounded-full bg-white/15 px-4 py-1.5 text-[11.5px] font-semibold transition-colors hover:bg-white/25"
                   >
                     Seçimimi kaydet
                   </button>
@@ -171,7 +173,7 @@ export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean })
                   <button
                     type="button"
                     onClick={() => consentStore.set([])}
-                    className="rounded-full bg-white/15 px-5 py-2 text-[12.5px] font-semibold transition-colors hover:bg-white/25"
+                    className="rounded-full bg-white/15 px-4 py-1.5 text-[11.5px] font-semibold transition-colors hover:bg-white/25"
                   >
                     Tümünü reddet
                   </button>
@@ -179,7 +181,7 @@ export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean })
                 <button
                   type="button"
                   onClick={() => consentStore.set(["olcum", "pazarlama"])}
-                  className="rounded-full bg-rust px-5 py-2 text-[12.5px] font-semibold transition-colors hover:bg-rust/85"
+                  className="rounded-full bg-rust px-4 py-1.5 text-[11.5px] font-semibold transition-colors hover:bg-rust/85"
                 >
                   Tümünü kabul et
                 </button>

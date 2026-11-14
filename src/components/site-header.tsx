@@ -31,6 +31,15 @@ export function SiteHeader({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // iPhone çentik alanı header ile aynı renkte olsun: mobilde kaydırınca beyaz, üstteyken koyu yeşil
+  useEffect(() => {
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    const color = mobile && scrolled && !open ? "#ffffff" : "#0d2622";
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", color));
+    // Safari bazı sürümlerde sayfa zeminine bakar: html zemini de aynı renge çekilir (üst kaydırma taşması)
+    document.documentElement.style.backgroundColor = mobile && scrolled && !open ? "#ffffff" : "";
+  }, [scrolled, open]);
+
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
@@ -44,7 +53,7 @@ export function SiteHeader({
         // Kaydırınca: mobilde beyaz zemin + koyu yeşil yazı/logo, masaüstünde koyu yeşil zemin + beyaz
         className={`fixed inset-x-0 top-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center px-6 transition-[height,background-color,color,box-shadow] duration-500 md:px-12 ${
           scrolled
-            ? "h-16 bg-white/95 text-forest-deep shadow-[0_1px_0_rgb(21_58_52/0.08)] backdrop-blur-md md:bg-forest-deep/85 md:text-white md:shadow-none"
+            ? "h-16 bg-white text-forest-deep shadow-[0_1px_0_rgb(21_58_52/0.08)] md:bg-forest-deep/85 md:text-white md:shadow-none md:backdrop-blur-md"
             : "h-20 bg-black/10 text-white backdrop-blur-[2px]"
         }`}
       >

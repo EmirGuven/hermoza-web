@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Montserrat, Outfit } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/lib/site";
@@ -27,6 +27,12 @@ export const metadata: Metadata = {
   title: "Hermoza Kitchen & Atelier — Ölçüye özel mutfak ve mobilya",
   description:
     "Mutfak, yaşam alanı ve giyinme odası için atölyede üretilen ölçüye özel masif ahşap mobilyalar.",
+};
+
+// iPhone'da çentik/durum çubuğu rengi. Sayfanın üstünde koyu yeşil; mobilde kaydırınca header beyaza
+// döndüğünde SiteHeader bunu beyaz yapar (header ile aynı renk olsun diye).
+export const viewport: Viewport = {
+  themeColor: "#0d2622",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
