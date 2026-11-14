@@ -79,7 +79,22 @@ function Toggle({
   );
 }
 
-export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean }) {
+/** Microsoft Clarity: yalnızca "ölçüm" onayı varsa, ayrı parça olarak ve bir kez yüklenir */
+let clarityStarted = false;
+function startClarity(id: string) {
+  if (clarityStarted || !id) return;
+  clarityStarted = true;
+  import("@microsoft/clarity")
+    .then(({ default: Clarity }) => {
+      Clarity.init(id);
+      Clarity.consent(true);
+    })
+    .catch(() => {
+      clarityStarted = false;
+    });
+}
+
+export function CookieConsent({ newsletterPopup, clarityId = "" }: { newsletterPopup: boolean; clarityId?: string }) {
   // Pencere sunucu HTML'inde hemen çizilir (sayfanın ilk boyamasında görünür, LCP'yi geciktirmez).
   // Onay vermiş ziyaretçide <head>'deki betik html'e data-consent koyar ve CSS pencereyi boyamadan gizler;
   // tarayıcıda çerez okununca pencere tamamen kaldırılır.
@@ -88,6 +103,11 @@ export function CookieConsent({ newsletterPopup }: { newsletterPopup: boolean })
   const [olcum, setOlcum] = useState(true);
   const [pazarlama, setPazarlama] = useState(true);
   const [popup, setPopup] = useState(false);
+
+  // Ölçüm onayı verildiğinde (sayfa açılışında ya da pencereden) Clarity başlar
+  useEffect(() => {
+    if (clarityId && consent.split(".").includes("olcum")) startClarity(clarityId);
+  }, [consent, clarityId]);
 
   useEffect(() => {
     if (!newsletterPopup || !consent || readCookie(NL_SEEN)) return;

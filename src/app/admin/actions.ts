@@ -125,6 +125,7 @@ export async function saveGeneral(_: ActionState, f: FormData): Promise<ActionSt
     ogImage: str(f, "ogImage"),
     googleVerification: str(f, "googleVerification").replace(/.*content="([^"]+)".*/, "$1"),
     bingVerification: str(f, "bingVerification").replace(/.*content="([^"]+)".*/, "$1"),
+    clarityId: str(f, "clarityId").replace(/[^a-z0-9]/gi, ""),
   });
   return done();
 }

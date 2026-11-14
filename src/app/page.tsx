@@ -5,7 +5,6 @@ import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { BackgroundVideo } from "@/components/background-video";
 import { CollectionsShowcase } from "@/components/collections-showcase";
 import { ContactForm } from "@/components/contact-form";
-import { CookieConsent } from "@/components/cookie-consent";
 import { Hero } from "@/components/hero";
 import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
@@ -286,7 +285,6 @@ export default async function Home() {
 
       <SiteFooter general={general} contact={contact} />
 
-      <CookieConsent newsletterPopup={general.newsletterPopup} />
     </>
   );
 }

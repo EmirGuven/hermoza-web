@@ -25,6 +25,8 @@ export type GeneralSettings = {
   googleVerification: string;
   /** Bing Webmaster doğrulama kodu */
   bingVerification: string;
+  /** Microsoft Clarity proje kimliği (ziyaretçi "Ölçüm" çerezine onay verirse yüklenir) */
+  clarityId: string;
 };
 
 export type ContactSettings = {
@@ -124,6 +126,7 @@ export const defaultGeneral: GeneralSettings = {
   ogImage: "/og-hermoza.jpg",
   googleVerification: "",
   bingVerification: "",
+  clarityId: "",
 };
 
 export const defaultContact: ContactSettings = {

@@ -61,6 +61,13 @@ export default async function GeneralPage() {
                 hint="Search Console > Mülk ekle > HTML etiketi. Etiketin tamamını ya da sadece content değerini yapıştırın."
               />
               <TextField label="Bing Webmaster doğrulama kodu" name="bingVerification" defaultValue={g.bingVerification} />
+              <TextField
+                label="Microsoft Clarity proje kimliği"
+                name="clarityId"
+                defaultValue={g.clarityId}
+                placeholder="ör. abc123xyz"
+                hint="Clarity > Settings > Overview > Project ID. Yalnızca çerez penceresinde “Ölçüm”e onay veren ziyaretçilerde çalışır (KVKK)."
+              />
               <div className="alert alert--info">
                 Site haritası: <code>/sitemap.xml</code> · Robots: <code>/robots.txt</code> · Yapay zeka özeti: <code>/llms.txt</code>
               </div>
