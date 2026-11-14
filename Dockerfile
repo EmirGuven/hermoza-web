@@ -46,7 +46,7 @@ COPY --from=build --chown=node:node /app/drizzle ./drizzle
 COPY --from=migrator --chown=node:node /migrate/node_modules ./migrate/node_modules
 COPY --from=migrator --chown=node:node /migrate/package.json ./migrate/package.json
 COPY --from=build --chown=node:node /app/scripts/migrate.mjs ./migrate/migrate.mjs
-RUN mkdir -p /app/uploads && chown node:node /app/uploads
+RUN mkdir -p /app/uploads /app/.next/cache/images && chown node:node /app/uploads /app/.next/cache /app/.next/cache/images
 
 # node kullanıcısı (uid 1000) sunucudaki dev kullanıcısıyla aynı: uploads klasörüne yazabilir
 USER node

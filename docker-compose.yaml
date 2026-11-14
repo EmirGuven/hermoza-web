@@ -64,6 +64,8 @@ services:
     volumes:
       # Yüklenen görsel ve videolar: sunucuda /srv/docker/apps/hermoza/uploads (deploy'lar arasında kalıcı)
       - ./uploads:/app/uploads
+      # Küçültülmüş görsel önbelleği deploy'lar arasında korunur (yoksa her deploy'dan sonra ilk ziyaretçiler bekler)
+      - image_cache:/app/.next/cache/images
 
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
@@ -107,6 +109,10 @@ services:
 secrets:
   database_url:
     environment: DATABASE_URL_BUILD
+
+volumes:
+  image_cache:
+    name: hermoza_image_cache
 
 networks:
   proxy:
