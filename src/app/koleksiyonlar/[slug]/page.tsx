@@ -219,7 +219,7 @@ async function CollectionContent({ params, siteName }: { params: Props["params"]
       {next && (
         <Link
           href={`/koleksiyonlar/${next.slug}`}
-          className="group relative flex h-[56svh] min-h-[400px] items-center justify-center overflow-hidden bg-forest-deep text-center text-white"
+          className="group relative flex h-[56svh] min-h-[400px] items-end overflow-hidden bg-forest-deep text-white"
         >
           {next.image && (
             <Image
@@ -230,11 +230,12 @@ async function CollectionContent({ params, siteName }: { params: Props["params"]
               className="object-cover opacity-55 transition-all duration-[1.8s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04] group-hover:opacity-75"
             />
           )}
-          <div className="absolute inset-0 bg-black/30" />
-          <div className="relative px-6">
+          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="relative mx-auto w-full max-w-[1680px] px-6 pb-16 md:px-12 md:pb-20">
             <Eyebrow className="mb-6 text-white/65">Sonraki koleksiyon</Eyebrow>
             <p className="text-2xl font-extralight uppercase tracking-[0.32em] md:text-4xl">{next.title}</p>
-            <span className="mx-auto mt-8 block h-px w-10 bg-white/50 transition-all duration-700 group-hover:w-20" aria-hidden />
+            <span className="mt-8 block h-px w-10 bg-white/50 transition-all duration-700 group-hover:w-20" aria-hidden />
           </div>
         </Link>
       )}
