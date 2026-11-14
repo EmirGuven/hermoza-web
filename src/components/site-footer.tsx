@@ -55,6 +55,7 @@ export function SiteFooter({
           {contact.phone && <a href={tel} className="hover:text-white">{contact.phone}</a>}
           {contact.email && <a href={`mailto:${contact.email}`} className="hover:text-white">{contact.email}</a>}
           <a href="/cerez-politikasi" className="hover:text-white">Çerez politikası</a>
+            <a href="/site-haritasi" className="hover:text-white">Site haritası</a>
           {socials.map((s) => (
             <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="hover:text-white">
               {s.label}
