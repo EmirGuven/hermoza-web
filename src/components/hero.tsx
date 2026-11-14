@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { preload } from "react-dom";
 import { optimizedImage } from "@/lib/image-url";
+import { pickVideoSrc, playMuted } from "@/lib/video-src";
 import type { VideoSet } from "@/lib/content-types";
 
 /** Sadece döngüdeki video. Videolar panelden (Ana Sayfa) seçilir. */
@@ -12,20 +13,21 @@ export function Hero({ video, title }: { video: VideoSet; title: string }) {
   const poster = video.poster ? optimizedImage(video.poster, 1280, 65) : undefined;
   if (poster) preload(poster, { as: "image", fetchPriority: "high" });
 
-  // "Hareketi azalt" açık kullanıcılarda video oynamaz, poster görünür.
+  // Video, sayfa tamamen yüklendikten sonra başlar (önce poster görünür, ilk açılış hızlı olur).
+  // Kaynak ekrana göre seçilir: mobil yalnızca mobil dosyayı indirir. "Hareketi azalt" açıksa yalnızca poster.
   useEffect(() => {
     const v = ref.current;
-    if (!v) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      v.pause();
-    } else {
-      // React sunucu HTML'ine "muted" özelliğini yazmaz; iOS Safari sessiz olmayan videoyu
-      // otomatik oynatmaz. Oynatmadan önce kesin olarak sessize al.
-      v.muted = true;
-      v.defaultMuted = true;
-      v.play().catch(() => {});
-    }
-  }, [video.desktop, video.mobile]);
+    if (!v || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const start = () => {
+      const src = pickVideoSrc(video);
+      if (!src) return;
+      if (v.getAttribute("src") !== src) v.src = src;
+      playMuted(v);
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => window.removeEventListener("load", start);
+  }, [video]);
 
   return (
     <section className="relative h-svh min-h-[560px] w-full overflow-hidden bg-forest-deep">
@@ -33,21 +35,17 @@ export function Hero({ video, title }: { video: VideoSet; title: string }) {
       <h1 className="sr-only">{title}</h1>
       {video.desktop && (
         <video
-          // Video değişince öğe yeniden oluşsun (source değişikliği tek başına yüklemez)
+          // Video değişince öğe yeniden oluşsun
           key={video.desktop + video.mobile}
           ref={ref}
           className="absolute inset-0 h-full w-full object-cover"
           poster={poster}
           muted
-          autoPlay
           loop
           playsInline
-          preload="metadata"
+          preload="none"
           aria-label="Hermoza tanıtım videosu"
-        >
-          {video.mobile && <source src={video.mobile} type="video/mp4" media="(max-width: 767px)" />}
-          <source src={video.desktop} type={video.desktop.endsWith(".webm") ? "video/webm" : "video/mp4"} />
-        </video>
+        />
       )}
       {/* Şeffaf header'daki beyaz yazılar açık sahnelerde de okunsun diye çok hafif üst gölge */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-linear-to-b from-black/35 to-transparent" />

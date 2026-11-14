@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { VideoSet } from "@/lib/content-types";
 import { optimizedImage } from "@/lib/image-url";
+import { pickVideoSrc, playMuted } from "@/lib/video-src";
 
 /**
  * Arka plan videosu: ekrana yaklaşınca yüklenip oynar, ekrandan çıkınca durur.
@@ -19,14 +20,10 @@ export function BackgroundVideo({ video, className = "" }: { video: VideoSet; cl
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // iOS Safari yalnızca sessiz videoyu otomatik oynatır (React "muted" özelliğini HTML'e yazmaz)
-          v.muted = true;
-          v.defaultMuted = true;
-          if (v.preload === "none") {
-            v.preload = "auto";
-            v.load();
-          }
-          v.play().catch(() => {});
+          // Ekrana yaklaşınca ekrana uygun dosya yüklenir (mobilde mobil sürüm)
+          const src = pickVideoSrc(video);
+          if (src && v.getAttribute("src") !== src) v.src = src;
+          playMuted(v);
         } else {
           v.pause();
         }
@@ -35,7 +32,7 @@ export function BackgroundVideo({ video, className = "" }: { video: VideoSet; cl
     );
     io.observe(v);
     return () => io.disconnect();
-  }, [video.desktop, video.mobile]);
+  }, [video]);
 
   if (!video.desktop) {
     // Video yoksa sadece poster (varsa) arka plan olur
@@ -57,8 +54,6 @@ export function BackgroundVideo({ video, className = "" }: { video: VideoSet; cl
       preload="none"
       aria-hidden
     >
-      {video.mobile && <source src={video.mobile} type="video/mp4" media="(max-width: 767px)" />}
-      <source src={video.desktop} type={video.desktop.endsWith(".webm") ? "video/webm" : "video/mp4"} />
     </video>
   );
 }
