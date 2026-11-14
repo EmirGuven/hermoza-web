@@ -90,7 +90,9 @@ export function CollectionsPanels({
                 src={c.image}
                 alt={`${siteName} ${c.title}`}
                 fill
-                sizes="(min-width: 768px) 60vw, 100vw"
+                // Mobilde açık panel ekranın ~%75'i; masaüstünde açık panel ~%60. Kalite 65: görünür fark yok, dosya küçük
+                sizes="(min-width: 768px) 60vw, 75vw"
+                quality={65}
                 className="cx-img object-cover"
                 priority={i === 0}
               />
