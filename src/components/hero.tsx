@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { preload } from "react-dom";
+import { optimizedImage } from "@/lib/image-url";
 import type { VideoSet } from "@/lib/content-types";
 
 /** Sadece döngüdeki video. Videolar panelden (Ana Sayfa) seçilir. */
 export function Hero({ video, title }: { video: VideoSet; title: string }) {
   const ref = useRef<HTMLVideoElement>(null);
+  // Poster sayfanın en büyük öğesi (LCP): küçültülmüş WebP olarak ve en yüksek öncelikle yüklenir
+  const poster = video.poster ? optimizedImage(video.poster, 1280, 65) : undefined;
+  if (poster) preload(poster, { as: "image", fetchPriority: "high" });
 
   // "Hareketi azalt" açık kullanıcılarda video oynamaz, poster görünür.
   useEffect(() => {
@@ -32,7 +37,7 @@ export function Hero({ video, title }: { video: VideoSet; title: string }) {
           key={video.desktop + video.mobile}
           ref={ref}
           className="absolute inset-0 h-full w-full object-cover"
-          poster={video.poster || undefined}
+          poster={poster}
           muted
           autoPlay
           loop

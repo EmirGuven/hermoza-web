@@ -11,8 +11,14 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 828, 1080, 1280, 1600, 1920, 2560],
     imageSizes: [96, 256, 384],
     formats: ["image/webp"],
+    // İzin verilen kaliteler (Next 16 varsayılanı yalnızca 75): posterler 65 ile daha hafif
+    qualities: [65, 75],
   },
   cacheComponents: true,
+  experimental: {
+    // Tailwind CSS'i küçük (≈15 KB): ayrı dosya yerine HTML'e gömülür, ilk boyama beklemez
+    inlineCss: true,
+  },
   partialPrefetching: true,
   turbopack: {
     rules: {

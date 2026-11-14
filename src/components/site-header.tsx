@@ -78,8 +78,9 @@ export function SiteHeader({
             src={logo}
             alt={general.siteName}
             // İmza yatay (≈ 995x360), ikon dikey; görünen boyut CSS yüksekliğiyle belirlenir
-            width={wide ? 995 : 212}
-            height={wide ? 360 : 522}
+            // Ekranda görünen boyut: tarayıcı buna göre küçük dosya indirir (eskiden 1080px iniyordu)
+            width={wide ? 155 : 18}
+            height={wide ? 56 : 44}
             priority
             className={`w-auto transition-[height,opacity] duration-500 ${
               wide ? (scrolled ? "h-8 max-md:opacity-0 md:h-10" : "h-9 md:h-14") : scrolled ? "h-9 max-md:opacity-0" : "h-11"

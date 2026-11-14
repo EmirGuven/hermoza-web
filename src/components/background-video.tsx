@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { VideoSet } from "@/lib/content-types";
+import { optimizedImage } from "@/lib/image-url";
 
 /**
  * Arka plan videosu: ekrana yaklaşınca yüklenip oynar, ekrandan çıkınca durur.
@@ -40,7 +41,7 @@ export function BackgroundVideo({ video, className = "" }: { video: VideoSet; cl
     // Video yoksa sadece poster (varsa) arka plan olur
     return video.poster ? (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={video.poster} alt="" className={`absolute inset-0 h-full w-full object-cover ${className}`} />
+      <img src={optimizedImage(video.poster)} alt="" loading="lazy" decoding="async" className={`absolute inset-0 h-full w-full object-cover ${className}`} />
     ) : null;
   }
 
@@ -49,7 +50,7 @@ export function BackgroundVideo({ video, className = "" }: { video: VideoSet; cl
       key={video.desktop + video.mobile}
       ref={ref}
       className={`absolute inset-0 h-full w-full object-cover ${className}`}
-      poster={video.poster || undefined}
+      poster={video.poster ? optimizedImage(video.poster, 1280, 65) : undefined}
       muted
       loop
       playsInline
