@@ -1,7 +1,7 @@
 import { getCollections, getPosts, getSetting } from "@/lib/content";
 import { SITE_URL } from "@/lib/site";
 
-// GEO (Generative Engine Optimization): ChatGPT, Perplexity, Gemini gibi yapay zekâ asistanlarının
+// GEO (Generative Engine Optimization): ChatGPT, Perplexity, Gemini gibi yapay zeka asistanlarının
 // firmayı doğru özetlemesi için sade metin özet. İçerik panelden yönetilen verilerden oluşur.
 export async function GET() {
   const [general, contact, home, collections, journal] = await Promise.all([
@@ -25,7 +25,7 @@ export async function GET() {
     "",
     "## Çalışma şekli",
     "- Ücretsiz keşif: talep formu ya da telefonla; 48 saat içinde dönüş yapılır.",
-    "- Mekân yerinde ölçülür, tasarım ve malzeme seçimi birlikte yapılır.",
+    "- Mekan yerinde ölçülür, tasarım ve malzeme seçimi birlikte yapılır.",
     "- Üretim kendi atölyemizde, montaj kendi ekibimizle yapılır.",
     "",
     "## İletişim",
@@ -38,7 +38,7 @@ export async function GET() {
     "",
     "## Sayfalar",
     `- [Ana sayfa](${SITE_URL}/): koleksiyonlar, atölye yaklaşımı ve iletişim formu`,
-    `- [Blog](${SITE_URL}/blog): malzeme rehberleri, proje hikâyeleri ve atölyeden notlar`,
+    `- [Blog](${SITE_URL}/blog): malzeme rehberleri, proje hikayeleri ve atölyeden notlar`,
     `- [Çerez politikası ve aydınlatma metni](${SITE_URL}/cerez-politikasi)`,
     ...(journal.length
       ? [

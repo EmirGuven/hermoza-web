@@ -62,7 +62,7 @@ export default async function GeneralPage() {
               />
               <TextField label="Bing Webmaster doğrulama kodu" name="bingVerification" defaultValue={g.bingVerification} />
               <div className="alert alert--info">
-                Site haritası: <code>/sitemap.xml</code> · Robots: <code>/robots.txt</code> · Yapay zekâ özeti: <code>/llms.txt</code>
+                Site haritası: <code>/sitemap.xml</code> · Robots: <code>/robots.txt</code> · Yapay zeka özeti: <code>/llms.txt</code>
               </div>
             </div>
           </div>

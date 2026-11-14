@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** Google ve yapay zekâ asistanları için işletme bilgisi (schema.org JSON-LD) */
+/** Google ve yapay zeka asistanları için işletme bilgisi (schema.org JSON-LD) */
 function jsonLd(
   general: Awaited<ReturnType<typeof getSetting<"general">>>,
   contact: Awaited<ReturnType<typeof getSetting<"contact">>>,
@@ -155,7 +155,8 @@ export default async function Home() {
 
         {/* Blog */}
         {journal.length > 0 && (
-          <section id="journal" className="mx-auto max-w-7xl px-6 py-28 md:px-12 md:py-36">
+          <section id="journal" className="bg-mist">
+          <div className="mx-auto max-w-7xl px-6 py-28 md:px-12 md:py-36">
             <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
               <div>
                 <Eyebrow className="text-rust">{home.journal.eyebrow}</Eyebrow>
@@ -199,6 +200,7 @@ export default async function Home() {
                 </Reveal>
               ))}
             </div>
+          </div>
           </section>
         )}
 

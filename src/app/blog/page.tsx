@@ -11,7 +11,7 @@ import { getPosts, getSetting } from "@/lib/content";
 export async function generateMetadata(): Promise<Metadata> {
   const [g, home] = await Promise.all([getSetting("general"), getSetting("home")]);
   const title = `${home.journal.title} — Blog`;
-  const description = `${g.siteName} atölyesinden malzeme rehberleri, proje hikâyeleri ve ölçüye özel mobilya üzerine notlar.`;
+  const description = `${g.siteName} atölyesinden malzeme rehberleri, proje hikayeleri ve ölçüye özel mobilya üzerine notlar.`;
   return {
     title,
     description,
@@ -48,7 +48,7 @@ export default async function BlogIndex() {
               {home.journal.title}
             </h1>
             <p className="mt-8 max-w-xl font-light leading-relaxed text-white/65">
-              Malzeme rehberleri, proje hikâyeleri ve ölçüye özel mobilya üzerine atölyeden notlar.
+              Malzeme rehberleri, proje hikayeleri ve ölçüye özel mobilya üzerine atölyeden notlar.
             </p>
           </div>
         </section>

@@ -13,7 +13,8 @@ import {
   type SettingValue,
 } from "@/lib/content-types";
 
-/** Panelde kayıt yapılınca updateTag(SITE_TAG) ile tüm site önbelleği yenilenir. */
+/** Panelde kayıt yapılınca updateTag(SITE_TAG) ile tüm site önbelleği yenilenir.
+ *  (Geliştirmede bu dosya değişince de önbellek sıfırlanır.) */
 export const SITE_TAG = "site";
 
 /** Kayıtlı değeri varsayılanla birleştirir: yeni eklenen alanlar eski kayıtlarda da dolu gelir. */
@@ -72,7 +73,24 @@ export async function getCollections(): Promise<Collection[]> {
       .orderBy(asc(collections.sort), asc(collections.id));
   } catch (e) {
     console.error("[content] koleksiyonlar okunamadı:", (e as Error).message);
-    return defaultCollections.map((c, i) => ({ ...c, id: -(i + 1) }));
+    return fallbackCollections();
+  }
+}
+
+const fallbackCollections = (): Collection[] => defaultCollections.map((c, i) => ({ ...c, id: -(i + 1) }));
+
+/** Tek koleksiyon (yalnızca yayındakiler) — detay sayfası */
+export async function getCollection(slug: string): Promise<Collection | null> {
+  "use cache";
+  cacheTag(SITE_TAG);
+  try {
+    const row = await db.query.collections.findFirst({
+      where: and(eq(collections.slug, slug), eq(collections.active, true)),
+    });
+    return row ?? null;
+  } catch (e) {
+    console.error("[content] koleksiyon okunamadı:", (e as Error).message);
+    return fallbackCollections().find((c) => c.slug === slug) ?? null;
   }
 }
 

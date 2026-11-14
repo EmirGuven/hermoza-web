@@ -19,7 +19,7 @@ export function CollectionsShowcase({
   siteName: string;
 }) {
   return (
-    <section id="koleksiyonlar" className="bg-cream py-24 md:py-32">
+    <section id="koleksiyonlar" className="bg-mist py-24 md:py-32">
       <div className="mx-auto mb-14 grid max-w-7xl gap-8 px-6 md:mb-20 md:grid-cols-[1.2fr_1fr] md:items-end md:px-12">
         <Reveal>
           {section.eyebrow && (

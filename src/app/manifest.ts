@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Ölçüye özel mutfak, yaşam alanı ve giyinme odası mobilyaları.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f4ede6",
+    background_color: "#ffffff",
     theme_color: "#153a34",
     lang: "tr",
     icons: [

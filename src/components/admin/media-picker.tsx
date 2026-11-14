@@ -39,13 +39,18 @@ export function MediaPicker({
   current,
   onClose,
   onPick,
+  onPickMany,
 }: {
   kind: "image" | "video";
   open: boolean;
   current?: string;
   onClose: () => void;
-  onPick: (url: string) => void;
+  onPick?: (url: string) => void;
+  /** Verilirse çoklu seçim: kütüphaneden birden fazla dosya işaretlenip birlikte eklenir */
+  onPickMany?: (urls: string[]) => void;
 }) {
+  const multi = !!onPickMany;
+  const [picked, setPicked] = useState<string[]>([]);
   const [files, setFiles] = useState<MediaFile[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [q, setQ] = useState("");
@@ -80,7 +85,14 @@ export function MediaPicker({
       const up = await uploadFiles(list);
       toast.success(`${up.length} dosya yüklendi`);
       setReload((n) => n + 1);
-      if (up.length === 1 && up[0].kind === kind) onPick(up[0].url);
+      const urls = up.filter((f) => f.kind === kind).map((f) => f.url);
+      if (multi) {
+        // Çoklu modda yüklenenler doğrudan eklenir
+        if (urls.length) {
+          onPickMany!(urls);
+          setPicked([]);
+        }
+      } else if (urls.length === 1) onPick?.(urls[0]);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -90,19 +102,27 @@ export function MediaPicker({
   }
 
   if (!open) return null;
+  const close = () => {
+    setPicked([]);
+    onClose();
+  };
   const shown = (files ?? []).filter((f) =>
     (f.originalName + f.path).toLocaleLowerCase("tr-TR").includes(q.toLocaleLowerCase("tr-TR"))
   );
 
   return (
-    <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && close()}>
       <div className="modal modal--wide" role="dialog" aria-modal="true">
         <div className="modal__head">
           <div>
             <div className="modal__title">{kind === "video" ? "Video seç" : "Görsel seç"}</div>
-            <div className="modal__sub">Kütüphaneden seçin ya da bilgisayarınızdan yükleyin.</div>
+            <div className="modal__sub">
+              {multi
+                ? "Birden fazla görsel işaretleyip ekleyin ya da bilgisayarınızdan toplu yükleyin."
+                : "Kütüphaneden seçin ya da bilgisayarınızdan yükleyin."}
+            </div>
           </div>
-          <button type="button" className="btn btn--icon btn--text" onClick={onClose} aria-label="Kapat">
+          <button type="button" className="btn btn--icon btn--text" onClick={close} aria-label="Kapat">
             <X />
           </button>
         </div>
@@ -134,26 +154,51 @@ export function MediaPicker({
             </p>
           ) : (
             <div className="media-grid">
-              {shown.map((f) => (
+              {shown.map((f) => {
+                const sel = multi ? picked.includes(f.url) : current === f.url;
+                return (
                 <button
                   type="button"
                   key={f.id}
-                  className={`media-tile ${current === f.url ? "is-selected" : ""}`}
-                  onClick={() => onPick(f.url)}
+                  className={`media-tile ${sel ? "is-selected" : ""}`}
+                  onClick={() =>
+                    multi
+                      ? setPicked((p) => (p.includes(f.url) ? p.filter((u) => u !== f.url) : [...p, f.url]))
+                      : onPick?.(f.url)
+                  }
                   title={f.path}
+                  aria-pressed={multi ? sel : undefined}
                 >
                   <div className="media-tile__img">
                     <MediaThumb file={f} />
                   </div>
                   <div className="media-tile__meta ellipsis">
-                    {current === f.url && <Check style={{ width: 14, height: 14, color: "var(--accent)", marginRight: 4, verticalAlign: -2 }} />}
+                    {sel && <Check style={{ width: 14, height: 14, color: "var(--accent)", marginRight: 4, verticalAlign: -2 }} />}
                     {f.path.split("/").pop()}
                   </div>
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
+        {multi && (
+          <div className="modal__foot">
+            <span className="muted grow">{picked.length ? `${picked.length} görsel seçildi` : "Eklemek istediğiniz görselleri işaretleyin"}</span>
+            <button type="button" className="btn" onClick={close}>Vazgeç</button>
+            <button
+              type="button"
+              className="btn btn--primary"
+              disabled={!picked.length}
+              onClick={() => {
+                onPickMany!(picked);
+                close();
+              }}
+            >
+              Ekle{picked.length ? ` (${picked.length})` : ""}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

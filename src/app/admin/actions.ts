@@ -184,26 +184,58 @@ export async function saveHome(_: ActionState, f: FormData): Promise<ActionState
 
 /* ---------------- Koleksiyonlar ---------------- */
 
+/** Galeri: [{src, caption}] JSON'u, geçersiz kayıtlar atılır */
+function gallery(f: FormData, k: string) {
+  try {
+    const v = JSON.parse(str(f, k) || "[]");
+    return Array.isArray(v)
+      ? v
+          .map((g) => ({ src: String(g?.src ?? "").trim(), caption: String(g?.caption ?? "").trim() }))
+          .filter((g) => g.src)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function saveCollection(_: ActionState, f: FormData): Promise<ActionState> {
   await requireAdmin();
   const id = Number(f.get("id") || 0);
+  const title = str(f, "title");
+  if (!title) return fail("Başlık gerekli");
+  const base = slugify(str(f, "slug") || title);
+  if (!base) return fail("Adres (slug) için başlıkta harf ya da rakam olmalı");
+
   const data = {
-    title: str(f, "title"),
+    title,
+    slug: await uniqueSlug(base, id, collections),
     body: str(f, "body"),
+    subtitle: str(f, "subtitle"),
+    content: String(f.get("content") ?? "").replace(/\r\n?/g, "\n").trim(),
     image: str(f, "image"),
+    gallery: gallery(f, "gallery"),
+    highlights: str(f, "highlights")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean),
+    seoTitle: str(f, "seoTitle"),
+    seoDescription: str(f, "seoDescription"),
     linkLabel: str(f, "linkLabel") || "Keşfet",
-    linkHref: str(f, "linkHref") || "#iletisim",
     active: bool(f, "active"),
   };
-  if (!data.title) return fail("Başlık gerekli");
+
   if (id) {
     await db.update(collections).set(data).where(eq(collections.id, id));
-  } else {
-    const [{ max }] = await db.select({ max: sql<number>`coalesce(max(${collections.sort}), 0)` }).from(collections);
-    await db.insert(collections).values({ ...data, sort: Number(max) + 1 });
+    updateTag(SITE_TAG);
+    return done(data.slug !== base ? `Kaydedildi. Bu adres kullanıldığı için “${data.slug}” verildi.` : "Kaydedildi");
   }
+  const [{ max }] = await db.select({ max: sql<number>`coalesce(max(${collections.sort}), 0)` }).from(collections);
+  const [row] = await db
+    .insert(collections)
+    .values({ ...data, sort: Number(max) + 1 })
+    .returning({ id: collections.id });
   updateTag(SITE_TAG);
-  redirect("/admin/koleksiyonlar?kaydedildi=1");
+  redirect(`/admin/koleksiyonlar/${row.id}?kaydedildi=1`);
 }
 
 export async function deleteCollection(id: number) {
@@ -248,14 +280,15 @@ function slugify(text: string) {
     .replace(/-+$/, "");
 }
 
-/** Aynı adres başka yazıda varsa sonuna -2, -3 … ekler */
-async function uniqueSlug(base: string, id: number) {
+/** Aynı adres başka kayıtta varsa sonuna -2, -3 … ekler (blog yazısı ya da koleksiyon) */
+async function uniqueSlug(base: string, id: number, table: typeof journalPosts | typeof collections = journalPosts) {
   for (let n = 1; ; n++) {
     const slug = n === 1 ? base : `${base}-${n}`;
-    const hit = await db.query.journalPosts.findFirst({
-      columns: { id: true },
-      where: and(eq(journalPosts.slug, slug), id ? ne(journalPosts.id, id) : undefined),
-    });
+    const [hit] = await db
+      .select({ id: table.id })
+      .from(table)
+      .where(and(eq(table.slug, slug), id ? ne(table.id, id) : undefined))
+      .limit(1);
     if (!hit) return slug;
   }
 }

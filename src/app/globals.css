@@ -15,7 +15,8 @@
   --color-forest-deep: #0d2622;
   --color-rust: #b34a25;
   --color-clay: #c9957d;
-  --color-cream: #f4ede6;
+  /* Sitenin ana zemini (eski krem yerine): beyaz */
+  --color-mist: #ffffff;
   --color-ink: #1a1a1a;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -496,3 +497,61 @@
     margin-inline: -4rem;
   }
 }
+
+/* ---------------- Koleksiyon detay sayfası (app/koleksiyonlar/[slug]) ---------------- */
+/* Kapak görseli yavaşça yakınlaşmadan yerine oturur */
+.kx-hero-img {
+  animation: kx-zoom 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes kx-zoom {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+/* Kapak yazıları alttan yükselerek belirir */
+.kx-rise {
+  animation: kx-rise 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes kx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* "Keşfedin" kaydırma çizgisi */
+.kx-scroll-line {
+  transform-origin: top;
+  animation: kx-line 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes kx-line {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  51% {
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kx-hero-img,
+  .kx-rise,
+  .kx-scroll-line {
+    animation: none !important;
+  }
+}
+

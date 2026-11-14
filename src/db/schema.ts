@@ -17,18 +17,38 @@ export const settings = pgTable("settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** Koleksiyonlar / hizmetler (Mutfak, Yaşam Alanı …) */
-export const collections = pgTable("collections", {
-  id: serial("id").primaryKey(),
-  sort: integer("sort").notNull().default(0),
-  title: text("title").notNull(),
-  body: text("body").notNull().default(""),
-  image: text("image").notNull().default(""),
-  linkLabel: text("link_label").notNull().default("Keşfet"),
-  linkHref: text("link_href").notNull().default("#iletisim"),
-  active: boolean("active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+/** Galeri görseli (koleksiyon detay sayfası) */
+export type GalleryImage = { src: string; caption: string };
+
+/** Koleksiyonlar / hizmetler (Mutfak, Yaşam Alanı …) ve detay sayfaları (/koleksiyonlar/<slug>) */
+export const collections = pgTable(
+  "collections",
+  {
+    id: serial("id").primaryKey(),
+    sort: integer("sort").notNull().default(0),
+    /** Detay sayfası adresi. Boş bırakılırsa başlıktan üretilir. */
+    slug: text("slug").notNull().default(""),
+    title: text("title").notNull(),
+    /** Ana sayfadaki kısa açıklama (detay sayfasında giriş cümlesi olarak da kullanılır) */
+    body: text("body").notNull().default(""),
+    /** Detay sayfası kapağındaki kısa slogan */
+    subtitle: text("subtitle").notNull().default(""),
+    /** Detay sayfasındaki uzun açıklama (Markdown) */
+    content: text("content").notNull().default(""),
+    image: text("image").notNull().default(""),
+    gallery: jsonb("gallery").$type<GalleryImage[]>().notNull().default([]),
+    /** Öne çıkan özellikler, ör. "Masif ceviz kapaklar" */
+    highlights: jsonb("highlights").$type<string[]>().notNull().default([]),
+    seoTitle: text("seo_title").notNull().default(""),
+    seoDescription: text("seo_description").notNull().default(""),
+    linkLabel: text("link_label").notNull().default("Keşfet"),
+    /** Eski: ana sayfa bağlantısı (artık detay sayfasına gidilir) */
+    linkHref: text("link_href").notNull().default("#iletisim"),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("collections_slug_idx").on(t.slug).where(sql`${t.slug} <> ''`)]
+);
 
 /** Blog yazıları (tablo adı eski "Journal" bölümünden kalma) */
 export const journalPosts = pgTable(

@@ -41,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="tr"
       className={`${montserrat.variable} ${geistMono.variable} ${outfit.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="min-h-full bg-cream font-sans text-ink">{children}</body>
+      <body className="min-h-full bg-mist font-sans text-ink">{children}</body>
     </html>
   );
 }

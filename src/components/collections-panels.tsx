@@ -74,7 +74,8 @@ export function CollectionsPanels({
     >
       {items.map((c, i) => {
         const num = String(i + 1).padStart(2, "0");
-        const href = c.linkHref;
+        // Panel koleksiyonun detay sayfasına gider
+        const href = c.slug ? `/koleksiyonlar/${c.slug}` : c.linkHref;
         const isOpen = open === i;
         const onClick = (e: React.MouseEvent) => {
           if (!isOpen && isMobile()) {

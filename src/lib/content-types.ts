@@ -55,12 +55,21 @@ export type HomeSettings = {
   contact: { eyebrow: string; title: string; text: string };
 };
 
+export type GalleryImage = { src: string; caption: string };
+
 export type Collection = {
   id: number;
   sort: number;
+  slug: string;
   title: string;
   body: string;
+  subtitle: string;
+  content: string;
   image: string;
+  gallery: GalleryImage[];
+  highlights: string[];
+  seoTitle: string;
+  seoDescription: string;
   linkLabel: string;
   linkHref: string;
   active: boolean;
@@ -137,7 +146,7 @@ export const defaultHome: HomeSettings = {
     heading:
       "Bir mobilyanın değeri, yıllar sonra bile ilk günkü gibi kapanan bir kapakta gizlidir. Biz o kapağı ölçüyle, sabırla ve elle yapıyoruz.",
     highlight: "ölçüyle, sabırla ve elle",
-    text: "Katalogdan seçmek yerine mekânınız için sıfırdan çizilen mobilyalar. Her proje tek, her parça imzalı.",
+    text: "Katalogdan seçmek yerine mekanınız için sıfırdan çizilen mobilyalar. Her proje tek, her parça imzalı.",
     buttonLabel: "Projenizi anlatın",
     buttonHref: "#iletisim",
     video: {
@@ -159,34 +168,56 @@ export const defaultHome: HomeSettings = {
   },
 };
 
+const collection = (
+  sort: number,
+  slug: string,
+  title: string,
+  body: string,
+  image: string,
+  highlights: string[]
+): Omit<Collection, "id"> => ({
+  sort,
+  slug,
+  title,
+  body,
+  subtitle: "",
+  content: "",
+  image,
+  gallery: [],
+  highlights,
+  seoTitle: "",
+  seoDescription: "",
+  linkLabel: "Keşfet",
+  linkHref: "#iletisim",
+  active: true,
+});
+
+/** Veritabanına ulaşılamazsa gösterilen koleksiyonlar (canlıdaki içerikle aynı tutulur) */
 export const defaultCollections: Omit<Collection, "id">[] = [
-  {
-    sort: 1,
-    title: "Mutfak",
-    body: "Masif kapaklar, doğal taş tezgâhlar ve her çekmecesi kullanıma göre planlanmış iç düzen.",
-    image: m("images/koleksiyon-mutfak.jpg"),
-    linkLabel: "Keşfet",
-    linkHref: "#iletisim",
-    active: true,
-  },
-  {
-    sort: 2,
-    title: "Yaşam Alanı",
-    body: "Kitaplıklar, TV duvarları ve konsollar; mekânın mimarisiyle bütünleşen ahşap yüzeyler.",
-    image: m("images/koleksiyon-yasam-alani.jpg"),
-    linkLabel: "Keşfet",
-    linkHref: "#iletisim",
-    active: true,
-  },
-  {
-    sort: 3,
-    title: "Giyinme Odası",
-    body: "Gömme dolaplar ve giyinme odaları; sessiz kapanan kapaklar, gizli aydınlatma.",
-    image: m("images/koleksiyon-giyinme-odasi.jpg"),
-    linkLabel: "Keşfet",
-    linkHref: "#iletisim",
-    active: true,
-  },
+  collection(
+    1,
+    "mutfak",
+    "Mutfak",
+    "Masif ahşabın sıcaklığı, doğal taşın karakteri ve pişirme alışkanlıklarınıza göre planlanan çekmece düzeni.",
+    m("images/img-4963.jpg"),
+    []
+  ),
+  collection(
+    2,
+    "yasam-alani",
+    "Yaşam Alanı",
+    "Mekana özel kitaplıklar, TV üniteleri ve konsollar, ahşabın sıcaklığını evin en çok vakit geçirdiğiniz köşesine taşır.",
+    m("images/img-4875.png"),
+    []
+  ),
+  collection(
+    3,
+    "banyo",
+    "Banyo",
+    "Doğal dokular ve mekana özel banyo dolaplarıyla ferah, düzenli bir alan.",
+    m("images/2.png"),
+    []
+  ),
 ];
 
 const post = (
@@ -226,7 +257,7 @@ export const defaultJournal: Omit<BlogPost, "id">[] = [
     "zekeriyakoyde-tas-ve-ahsabin-bulustugu-bir-mutfak",
     "Proje",
     "Zekeriyaköy’de taş ve ahşabın buluştuğu bir mutfak",
-    "Doğal taş tezgâh ve masif kapaklarla, bahçeye açılan bir aile mutfağının hikâyesi.",
+    "Doğal taş tezgah ve masif kapaklarla, bahçeye açılan bir aile mutfağının hikayesi.",
     m("images/journal-zekeriyakoy.jpg"),
     "2026-11-09T12:00:00+03:00"
   ),
@@ -234,7 +265,7 @@ export const defaultJournal: Omit<BlogPost, "id">[] = [
     "ada-mutfak-planlarken-dikkat-edilmesi-gereken-5-olcu",
     "Rehber",
     "Ada mutfak planlarken dikkat edilmesi gereken 5 ölçü",
-    "Geçiş boşluklarından tezgâh yüksekliğine, ada mutfağı rahat kullanmanın ölçüleri.",
+    "Geçiş boşluklarından tezgah yüksekliğine, ada mutfağı rahat kullanmanın ölçüleri.",
     m("images/journal-ada-mutfak.jpg"),
     "2026-11-09T12:00:00+03:00"
   ),
