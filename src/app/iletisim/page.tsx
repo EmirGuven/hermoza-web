@@ -181,7 +181,7 @@ export default async function ContactPage() {
             </Reveal>
             <Reveal delay={0.1}>
               <Eyebrow className="mb-10 text-bronze">Randevu talebi</Eyebrow>
-              <ContactForm />
+              <ContactForm metaPixelId={process.env.META_PIXEL_ID} />
             </Reveal>
           </div>
         </section>

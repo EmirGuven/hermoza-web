@@ -1,9 +1,43 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { ArrowRight, Check } from "lucide-react";
 import { submitContact, type ActionState } from "@/app/admin/actions";
+
+import { hasConsent } from "@/components/cookie-consent";
+
+type MetaPixel = {
+  (...args: unknown[]): void;
+  callMethod?: (...args: unknown[]) => void;
+  queue: unknown[][];
+  push?: MetaPixel;
+  loaded: boolean;
+  version: string;
+};
+
+function trackAppointment(pixelId: string) {
+  const browser = window as Window & { fbq?: MetaPixel; _fbq?: MetaPixel };
+  if (!browser.fbq) {
+    const queue: unknown[][] = [];
+    const pixel: MetaPixel = Object.assign(
+      (...args: unknown[]) => {
+        if (pixel.callMethod) pixel.callMethod(...args);
+        else queue.push(args);
+      },
+      { queue, loaded: true, version: "2.0" },
+    );
+    pixel.push = pixel;
+    browser.fbq = browser._fbq = pixel;
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = "https://connect.facebook.net/en_US/fbevents.js";
+    document.head.appendChild(script);
+    pixel("set", "autoConfig", false, pixelId);
+    pixel("init", pixelId);
+  }
+  browser.fbq("trackSingle", pixelId, "Lead");
+}
 
 function Submit() {
   const { pending } = useFormStatus();
@@ -19,8 +53,16 @@ function Submit() {
   );
 }
 
-export function ContactForm() {
+export function ContactForm({ metaPixelId }: { metaPixelId?: string }) {
   const [state, action] = useActionState<ActionState, FormData>(submitContact, {});
+
+  const tracked = useRef(false);
+  useEffect(() => {
+    if (!state.appointmentRecorded || tracked.current || !metaPixelId || !/^\d+$/.test(metaPixelId)) return;
+    if (!hasConsent("pazarlama")) return;
+    tracked.current = true;
+    trackAppointment(metaPixelId);
+  }, [state.appointmentRecorded, metaPixelId]);
 
   if (state.ok) {
     return (

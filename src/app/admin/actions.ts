@@ -32,6 +32,7 @@ export type ActionState = {
   error?: string;
   message?: string;
   at?: number;
+  appointmentRecorded?: boolean;
   /** Hata sonrası formda korunacak değerler (React form sıfırlamasına karşı) */
   values?: Record<string, string>;
 };
@@ -543,5 +544,8 @@ export async function submitContact(_: ActionState, f: FormData): Promise<Action
     ]);
   });
 
-  return done("Teşekkürler! Talebiniz alındı. Size bir onay e-postası gönderdik; en kısa sürede randevu için arayacağız.");
+  return {
+    ...done("Teşekkürler! Talebiniz alındı. Size bir onay e-postası gönderdik; en kısa sürede randevu için arayacağız."),
+    appointmentRecorded: true,
+  };
 }

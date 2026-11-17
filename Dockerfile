@@ -10,6 +10,8 @@ FROM node:22-alpine AS build
 WORKDIR /app
 # Sitemap, robots.txt, llms.txt ve paylaşım kartları build sırasında üretilir: site adresi burada da gerekli
 ARG SITE_URL=https://hermoza.com.tr
+ARG META_PIXEL_ID
+ENV META_PIXEL_ID=${META_PIXEL_ID}
 ENV NEXT_TELEMETRY_DISABLED=1 \
     SITE_URL=${SITE_URL}
 COPY --from=deps /app/node_modules ./node_modules

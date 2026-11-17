@@ -278,7 +278,7 @@ export default async function Home() {
                 )}
               </ul>
             </div>
-            <ContactForm />
+            <ContactForm metaPixelId={process.env.META_PIXEL_ID} />
           </div>
         </section>
       </main>

@@ -6,6 +6,7 @@ services:
       # Build sırasında sunucudaki Postgres'e (127.0.0.1:5432) ulaşıp sayfaları gerçek içerikle derlemek için
       network: host
       args:
+        META_PIXEL_ID: ${META_PIXEL_ID:-}
         # Sitemap / robots / paylaşım kartları build sırasında bu adresle üretilir
         SITE_URL: ${SITE_URL:-https://hermoza.com.tr}
       secrets:
@@ -44,6 +45,7 @@ services:
       - "traefik.http.services.hermoza-web.loadbalancer.server.port=3000"
 
     environment:
+      META_PIXEL_ID: ${META_PIXEL_ID:-}
       NODE_ENV: production
       HOSTNAME: "0.0.0.0"
       PORT: "3000"
